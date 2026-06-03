@@ -160,6 +160,9 @@ function Styles() {
       .fprev .fseg,.fprev .fbtn{opacity:.5}
       .fprev .fbtn{cursor:not-allowed}
       .fprev .fbtn:hover{border-color:var(--border);color:var(--ink-2)}
+      .fnote{display:flex;align-items:center;gap:7px;padding:7px 26px;font-size:11.5px;color:var(--ink-soft);
+        background:rgba(251,245,234,.5);border-bottom:1px solid var(--border-soft)}
+      .fnote b{color:var(--ink-muted);font-weight:600}
       .sync{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-muted)}
       .dot{width:7px;height:7px;border-radius:999px;background:var(--pos);box-shadow:0 0 0 3px rgba(63,122,110,.18)}
       .content{padding:24px 26px 40px;overflow:auto}
@@ -437,6 +440,10 @@ export default function App() {
             <button className="fbtn" disabled><Filter size={14} />All dates</button>
           </div>
           <div className="sync"><span className="dot" />QLD GeoResGlobe · GSQ Open Data · synced</div>
+        </div>
+        <div className="fnote">
+          <Filter size={12} />
+          <span>Commodity &amp; date filters are <b>preview</b> — this prototype's drill-collar data carries no per-hole commodity or date, so they're placeholders for a production data source, not active filters.</span>
         </div>
 
         {/* ───── query ───── */}

@@ -63,10 +63,13 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 
 ## Things that are intentionally the way they are — do not "helpfully" change
 
-- **Commodity (Cu/Au/Co) and date filters are currently decorative.** The PoC collar data
-  has no per-hole commodity or date. Do NOT fabricate commodity/date values to make them
-  work. Acceptable fixes: wire them to a real data source if one is added, or visibly mark
-  them "preview". In a verification tool a control that fakes interactivity is a liability.
+- **Commodity (Cu/Au/Co) and date filters are marked "preview" — not active filters.** The
+  PoC collar data has no per-hole commodity or date, so the controls are deliberately
+  disabled, badged "Preview" in the toolbar, and explained by a muted helper line + hover
+  tooltip stating they're placeholders for a production data source. Do NOT fabricate
+  commodity/date values to make them "work", and do NOT re-enable them without a real
+  per-hole data source behind them. The honest next step is to wire them to such a source.
+  In a verification tool a control that fakes interactivity is a liability.
 - **Insight callouts are hand-authored narrative** grounded in the real data (e.g. the
   "Carnaby's holes straddle two other holders' permits" finding is verified by a real
   point-in-polygon test). They are flagged in code comments. If you change the data, update
@@ -78,8 +81,9 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 
 ## Open improvements (good Claude Code tasks)
 
-1. Resolve the decorative commodity/date filters honestly (wire to real data or mark
-   "preview"). Highest priority — fake controls undermine a trust tool.
+1. ~~Resolve the decorative commodity/date filters honestly.~~ DONE — they are now disabled
+   and marked "preview" (badge + helper line + tooltip). Next: wire them to a real per-hole
+   commodity/date source so they can be honestly re-enabled as live filters.
 2. Derive the insight captions from the actual point-in-polygon computation instead of
    hardcoded strings, so they survive data changes.
 3. OPTIONAL geographic basemap: add a MapLibre GL JS view (no API token, vector tiles) as a
