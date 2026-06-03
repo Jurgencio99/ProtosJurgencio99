@@ -153,6 +153,13 @@ function Styles() {
         color:var(--ink-muted);cursor:pointer;transition:.12s;border-right:1px solid var(--border-soft)}
       .fseg button:last-child{border-right:0}
       .fseg button.on{background:var(--accent-cool);color:#fff}
+      .fseg button:disabled{cursor:not-allowed}
+      .fprev{display:flex;align-items:center;gap:8px;padding:4px 9px 4px 7px;border:1px dashed var(--border);border-radius:10px;background:transparent;cursor:help}
+      .fprev-tag{font-family:'Geist Mono',monospace;font-size:9.5px;letter-spacing:.07em;text-transform:uppercase;
+        color:var(--ink-soft);background:var(--surface-2);border:1px solid var(--border-soft);border-radius:999px;padding:2px 7px}
+      .fprev .fseg,.fprev .fbtn{opacity:.5}
+      .fprev .fbtn{cursor:not-allowed}
+      .fprev .fbtn:hover{border-color:var(--border);color:var(--ink-2)}
       .sync{margin-left:auto;display:flex;align-items:center;gap:7px;font-size:12px;color:var(--ink-muted)}
       .dot{width:7px;height:7px;border-radius:999px;background:var(--pos);box-shadow:0 0 0 3px rgba(63,122,110,.18)}
       .content{padding:24px 26px 40px;overflow:auto}
@@ -348,7 +355,6 @@ export default function App() {
   const [areaId, setAreaId] = useState("mtisa");
   const [view, setView] = useState("query");
   const [radius, setRadius] = useState(5000);
-  const [commodity, setCommodity] = useState("Cu");
   const [mapMode, setMapMode] = useState("aoi");
   const [hovered, setHovered] = useState(null);
   const [toast, setToast] = useState(null);
@@ -418,12 +424,18 @@ export default function App() {
               <button key={r} className={radius === r ? "on" : ""} onClick={() => setRadius(r)}>{r < 1000 ? r + " m" : r / 1000 + " km"}</button>
             ))}
           </div>
-          <div className="fseg">
-            {["Cu", "Au", "Co", "All"].map((c) => (
-              <button key={c} className={commodity === c ? "on" : ""} onClick={() => setCommodity(c)}>{c}</button>
-            ))}
+          {/* Commodity + date filters are PREVIEW: the PoC collar data carries no per-hole
+              commodity or announcement date, so these are shown (product vision) but disabled
+              and clearly labelled rather than faking interactivity — see CLAUDE.md. */}
+          <div className="fprev" title="Preview — not yet wired. The proof-of-concept extraction captures hole ID, collar coordinates, total depth, holder and source PDF, but not per-hole commodity or announcement date. These filters activate once those fields are extracted from the source reports.">
+            <span className="fprev-tag">Preview</span>
+            <div className="fseg">
+              {["Cu", "Au", "Co", "All"].map((c) => (
+                <button key={c} disabled>{c}</button>
+              ))}
+            </div>
+            <button className="fbtn" disabled><Filter size={14} />All dates</button>
           </div>
-          <button className="fbtn"><Filter size={14} />All dates</button>
           <div className="sync"><span className="dot" />QLD GeoResGlobe · GSQ Open Data · synced</div>
         </div>
 
