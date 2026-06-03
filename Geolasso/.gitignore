@@ -1,0 +1,6 @@
+Geolasso/node_modules
+Geolasso/dist
+cat > .gitignore <<'EOF'
+Geolasso/node_modules
+Geolasso/dist
+.DS_Store
