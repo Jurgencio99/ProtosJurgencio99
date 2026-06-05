@@ -22,7 +22,7 @@ import {
 import {
   Map, Layers, Crosshair, MapPin, Building2, FileText, Download, Database,
   CheckCircle2, AlertTriangle, ShieldCheck, Search, Target, Gauge, Activity,
-  Filter, ArrowUpRight, Inbox,
+  Filter, ArrowUpRight, Inbox, Box,
 } from "lucide-react";
 
 /* ─────────────────────────────── shared styling for entities ─────────────────────────────── */
@@ -404,6 +404,7 @@ export default function App() {
           { id: "query", label: "Area & tenements", icon: <Map size={16} />, sub: tenements.length + unresolved.length },
           { id: "drill", label: "Drill data", icon: <Layers size={16} />, sub: collars.length },
           { id: "prov", label: "Provenance & QA", icon: <ShieldCheck size={16} />, sub: null },
+          { id: "drill3d", label: "3D drill view", icon: <Box size={16} />, sub: null },
         ].map((n) => (
           <div key={n.id} className={"nav" + (view === n.id ? " on" : "")} onClick={() => setView(n.id)}>
             {n.icon}<span>{n.label}</span>{n.sub != null && <span className="navsub mono">{n.sub}</span>}
@@ -674,6 +675,31 @@ export default function App() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* ───── 3D drill view ───── */}
+        {view === "drill3d" && (
+          collars.length === 0 ? (
+            <div className="content fade">
+              <div className="card"><div className="card-b"><div className="empty">
+                <div className="ic"><Box size={22} /></div>
+                <div style={{ fontWeight: 600, color: "var(--ink-2)" }}>No drill data for 3D view</div>
+                <div style={{ fontSize: 12.5, maxWidth: 460 }}>This area had no announcement PDF corpus loaded, so no drill collars or assay intervals were extracted. The 3D view is available for <b>Mt Isa</b> — switch to that area to explore 18 holes with Cu% and Au g/t intervals in 3D.</div>
+              </div></div></div>
+            </div>
+          ) : (
+            <div className="fade" style={{ flex: 1, overflow: "hidden", display: "flex", flexDirection: "column", padding: "12px 26px 16px" }}>
+              <div style={{ marginBottom: 8, fontSize: 11.5, color: "var(--ink-soft)", display: "flex", alignItems: "center", gap: 7 }}>
+                <Box size={12} />
+                Interactive 3D — drag to orbit, scroll to zoom, hover a hole for assay intervals + source PDF.
+              </div>
+              <iframe
+                src="/drill3d.html"
+                title="GeoLasso 3D drill view — Mt Isa AOI"
+                style={{ flex: 1, width: "100%", border: "1px solid var(--border)", borderRadius: 10, display: "block" }}
+              />
+            </div>
+          )
         )}
       </div>
 

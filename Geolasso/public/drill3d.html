@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>GeoLasso — 3D drill view</title>
+<style>
+ html,body{margin:0;height:100%;background:#fff;font-family:system-ui,sans-serif}
+ #c{width:100%;height:100%;display:block}
+ #tip{position:fixed;pointer-events:none;background:#16202E;color:#fff;padding:6px 10px;
+      border-radius:6px;font-size:13px;display:none;max-width:320px}
+ #legend{position:fixed;left:12px;bottom:12px;background:rgba(255,255,255,.92);
+      border:1px solid #ddd;border-radius:8px;padding:10px 14px;font-size:12.5px;color:#1F2937}
+ #legend b{display:block;margin-bottom:4px}
+ .sw{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:6px;vertical-align:-2px}
+ #hud{position:fixed;right:12px;top:12px;background:rgba(255,255,255,.92);border:1px solid #ddd;
+      border-radius:8px;padding:8px 12px;font-size:12.5px;color:#1F2937}
+ #attr{position:fixed;right:8px;bottom:8px;font-size:10.5px;color:#6B7280}
+</style></head><body>
+<canvas id="c"></canvas><div id="tip"></div>
+<div id="legend"><b>Cu intervals</b>
+ <div><span class="sw" style="background:#DC2626"></span>&ge; 4% Cu</div>
+ <div><span class="sw" style="background:#F59E0B"></span>1–4% Cu</div>
+ <div><span class="sw" style="background:#14B8A6"></span>&lt; 1% Cu</div>
+ <div style="margin-top:4px;color:#6B7280">grey = hole trace · gold = tenement<br>hover a hole for details</div></div>
+<div id="hud">
+ <label><input type="checkbox" id="rot" checked> auto-rotate</label><br>
+ source: <label><input type="radio" name="src" value="global" checked> global</label>
+ <label><input type="radio" name="src" value="local"> local</label><br>
+ style: <label><input type="radio" name="style" value="photo"> photo</label>
+ <label><input type="radio" name="style" value="map"> map</label>
+ <label><input type="radio" name="style" value="off" checked> off</label><br>
+ <label><input type="checkbox" id="lab"> labels</label>
+ <label style="margin-left:8px">opacity <input type="range" id="op" min="10" max="100" value="55" style="width:80px;vertical-align:middle"></label>
+</div>
+<div id="attr">Imagery © Esri &amp; contributors · Tenure © State of Queensland</div>
+<script type="importmap">{"imports":{
+ "three":"https://unpkg.com/three@0.160.0/build/three.module.js",
+ "three/addons/":"https://unpkg.com/three@0.160.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import {OrbitControls} from 'three/addons/controls/OrbitControls.js';
+const D = {"collars": [{"p": [-106.8, 6.7, 349.1], "id": "CBDD017W2", "depth": 718, "src": "03071772_PA_koordinaatidega.pdf"}, {"p": [-106.8, 6.7, 349.1], "id": "CBDD017W3", "depth": 694, "src": "03071772_PA_koordinaatidega.pdf"}, {"p": [-106.8, 6.7, 349.1], "id": "CBDD017W5", "depth": 594, "src": "03071772_PA_koordinaatidega.pdf"}, {"p": [-106.8, 6.7, 349.1], "id": "CBDD017W7", "depth": 550, "src": "03071772_PA_koordinaatidega.pdf"}, {"p": [126.2, -7.3, 189.1], "id": "CBDD058", "depth": 72, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [25.2, 0.7, 442.1], "id": "CBRC034", "depth": 250, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [-91.8, 13.7, 451.1], "id": "CBRC037", "depth": 474, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [7.2, -7.3, 229.1], "id": "CBRC053", "depth": 396, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [174.2, -8.3, 337.1], "id": "CBRC055", "depth": 50, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [140.2, -8.3, 276.1], "id": "CBRC056", "depth": 65, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [136.2, -7.3, 237.1], "id": "CBRC057", "depth": 78, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [-33.8, 0.7, -613.9], "id": "CBRC059", "depth": 188, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [-29.8, 0.7, -613.9], "id": "CBRC060", "depth": 222, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [-25.8, 0.7, -616.9], "id": "CBRC061", "depth": 161, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [-15.8, 0.7, -620.9], "id": "CBRC062", "depth": 168, "src": "03055699_PA_koordinaatidega.pdf"}, {"p": [0.2, 0.7, -660.9], "id": "CBRC063", "depth": 192, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [0.2, 0.7, -661.9], "id": "CBRC064", "depth": 128, "src": "03063808_PA_koordinaatidega.pdf"}, {"p": [14.2, -7.3, 230.1], "id": "CBRC067", "depth": 330, "src": "03063808_PA_koordi"}], "traces": [{"a": [-106.8, 6.7, 349.1], "b": [-85.9, -710.8, 363.0], "id": "CBDD017W2"}, {"a": [-106.8, 6.7, 349.1], "b": [-86.6, -686.9, 362.5], "id": "CBDD017W3"}, {"a": [-106.8, 6.7, 349.1], "b": [-89.5, -586.9, 360.6], "id": "CBDD017W5"}, {"a": [-106.8, 6.7, 349.1], "b": [-90.8, -542.9, 359.8], "id": "CBDD017W7"}, {"a": [126.2, -7.3, 189.1], "b": [86.5, -66.3, 200.0], "id": "CBDD058"}, {"a": [25.2, 0.7, 442.1], "b": [86.4, -241.2, 427.1], "id": "CBRC034"}, {"a": [-91.8, 13.7, 451.1], "b": [25.8, -445.2, 435.2], "id": "CBRC037"}, {"a": [7.2, -7.3, 229.1], "b": [23.9, -402.8, 219.3], "id": "CBRC053"}, {"a": [174.2, -8.3, 337.1], "b": [144.6, -47.9, 344.2], "id": "CBRC055"}, {"a": [140.2, -8.3, 276.1], "b": [100.8, -59.2, 284.8], "id": "CBRC056"}, {"a": [136.2, -7.3, 237.1], "b": [89.5, -68.8, 247.6], "id": "CBRC057"}, {"a": [-33.8, 0.7, -613.9], "b": [32.9, -169.5, -570.1], "id": "CBRC059"}, {"a": [-29.8, 0.7, -613.9], "b": [8.2, -217.4, -598.0], "id": "CBRC060"}, {"a": [-25.8, 0.7, -616.9], "b": [15.6, -154.9, -617.4], "id": "CBRC061"}, {"a": [-15.8, 0.7, -620.9], "b": [47.3, -154.5, -633.2], "id": "CBRC062"}, {"a": [0.2, 0.7, -660.9], "b": [4.4, -189.2, -689.0], "id": "CBRC063"}, {"a": [0.2, 0.7, -661.9], "b": [33.8, -118.4, -694.7], "id": "CBRC064"}, {"a": [14.2, -7.3, 230.1], "b": [60.9, -333.8, 220.5], "id": "CBRC067"}], "intervals": [{"a": [75.4, -197.7, 429.8], "b": [79.1, -212.2, 428.9], "cu": 0.9, "label": "CBRC034: 15.0m @ 0.9% Cu, 0.1 g/t Au"}, {"a": [173.6, -9.1, 337.3], "b": [162.4, -24.1, 340.0], "cu": 0.6, "label": "CBRC055: 19.0m @ 0.6% Cu, 1.0 g/t Au"}, {"a": [153.5, -36.0, 342.1], "b": [149.4, -41.6, 343.1], "cu": 7.0, "label": "CBRC055: 7.0m @ 7.0% Cu, 2.3 g/t Au"}, {"a": [125.1, -27.9, 279.5], "b": [104.4, -54.5, 284.0], "cu": 1.8, "label": "CBRC056: 34.0m @ 1.8% Cu, 0.6 g/t Au"}, {"a": [132.0, -12.8, 238.1], "b": [89.5, -68.8, 247.6], "cu": 1.0, "label": "CBRC057: 71.0m @ 1.0% Cu, 0.1 g/t Au"}, {"a": [125.4, -8.5, 189.3], "b": [103.0, -41.7, 195.5], "cu": 0.5, "label": "CBDD058: 40.5m @ 0.5% Cu, 0.2 g/t Au"}, {"a": [1.0, -99.8, -617.2], "b": [9.4, -131.7, -617.3], "cu": 0.6, "label": "CBRC061: 33.0m @ 0.6% Cu, 0.2 g/t Au"}, {"a": [13.1, -70.4, -626.5], "b": [23.7, -96.3, -628.6], "cu": 0.2, "label": "CBRC062: 28.0m @ 0.2% Cu, 0.04 g/t Au"}, {"a": [-2.2, -79.9, -593.2], "b": [5.2, -98.9, -588.3], "cu": 0.4, "label": "CBRC059: 21.0m @ 0.4% Cu, 0.05 g/t Au"}, {"a": [24.0, -146.9, -575.9], "b": [26.5, -153.2, -574.3], "cu": 0.5, "label": "CBRC059: 7.0m @ 0.5% Cu, 0.1 g/t Au"}, {"a": [-8.4, -122.1, -604.9], "b": [-6.7, -131.9, -604.2], "cu": 0.4, "label": "CBRC060: 10.0m @ 0.4% Cu, 0.1 g/t Au"}, {"a": [-1.0, -164.4, -601.9], "b": [5.0, -198.7, -599.3], "cu": 0.3, "label": "CBRC060: 35.0m @ 0.3% Cu, 0.1 g/t Au"}, {"a": [1.4, -50.7, -668.5], "b": [1.4, -52.7, -668.8], "cu": 0.9, "label": "CBRC063: 2.0m @ 0.9% Cu, 0.1 g/t Au"}, {"a": [1.8, -68.5, -671.1], "b": [1.8, -71.5, -671.6], "cu": 3.5, "label": "CBRC063: 3.0m @ 3.5% Cu, 0.2 g/t Au"}, {"a": [2.5, -103.1, -676.2], "b": [3.3, -137.7, -681.4], "cu": 2.3, "label": "CBRC063: 35.0m @ 2.3% Cu, 0.6 g/t Au"}, {"a": [3.8, -159.5, -684.6], "b": [4.3, -183.2, -688.1], "cu": 0.5, "label": "CBRC063: 24.0m @ 0.5% Cu, 0.1 g/t Au"}, {"a": [22.0, -76.5, -683.1], "b": [23.0, -80.2, -684.2], "cu": 1.1, "label": "CBRC064: 4.0m @ 1.1% Cu, 0.1 g/t Au"}, {"a": [-1.0, -340.6, 438.8], "b": [-0.5, -342.6, 438.8], "cu": 0.4, "label": "CBRC037: 2.0m @ 0.4% Cu, 0.1 g/t Au"}, {"a": [1.3, -349.3, 438.5], "b": [2.3, -353.2, 438.4], "cu": 0.4, "label": "CBRC037: 4.0m @ 0.4% Cu, 0.1 g/t Au"}, {"a": [16.0, -216.0, 223.9], "b": [16.1, -218.0, 223.9], "cu": 0.6, "label": "CBRC053: 2.0m @ 0.6% Cu, 0.2 g/t Au"}, {"a": [16.4, -225.0, 223.7], "b": [17.3, -246.0, 223.2], "cu": 0.8, "label": "CBRC053: 21.0m @ 0.8% Cu, 0.1 g/t Au"}, {"a": [21.7, -351.9, 220.5], "b": [23.1, -384.8, 219.7], "cu": 0.4, "label": "CBRC053: 33.0m @ 0.4% Cu, 0.1 g/t Au"}, {"a": [36.7, -164.6, 225.5], "b": [39.0, -180.4, 225.0], "cu": 0.8, "label": "CBRC067: 16.0m @ 0.8% Cu, 0.04 g/t Au"}, {"a": [40.5, -191.3, 224.7], "b": [42.1, -202.2, 224.3], "cu": 1.1, "label": "CBRC067: 11.0m @ 1.1% Cu, 0.6 g/t Au"}, {"a": [49.6, -254.7, 222.8], "b": [50.0, -257.6, 222.7], "cu": 1.3, "label": "CBRC067: 3.0m @ 1.3% Cu, 0.4 g/t Au"}, {"a": [-89.8, -577.9, 360.4], "b": [-89.6, -585.9, 360.6], "cu": 2.4, "label": "CBDD017W2: 8.0m @ 2.4% Cu, 2.9 g/t Au"}, {"a": [-89.2, -598.7, 360.8], "b": [-88.8, -611.1, 361.1], "cu": 0.5, "label": "CBDD017W2: 12.4m @ 0.5% Cu, 0.1 g/t Au"}, {"a": [-89.2, -598.2, 360.8], "b": [-89.0, -606.9, 361.0], "cu": 1.0, "label": "CBDD017W3: 8.7m @ 1.0% Cu, 0.1 g/t Au"}, {"a": [-92.7, -478.0, 358.5], "b": [-92.5, -486.1, 358.7], "cu": 8.0, "label": "CBDD017W5: 8.1m @ 8.0% Cu, 2.2 g/t Au"}, {"a": [-93.0, -468.0, 358.3], "b": [-92.9, -472.2, 358.4], "cu": 8.2, "label": "CBDD017W7: 4.2m @ 8.2% Cu, 0.5 g/t Au"}], "rings": [[[1889.6, 0.0, -5490.5], [1902.4, 0.0, -3645.6], [175.3, 0.0, -3633.6], [162.3, 0.0, -5478.5], [-1565.0, 0.0, -5466.3], [-1568.8, 0.0, -6000.0], [1886.1, 0.0, -6000.0], [1889.6, 0.0, -5490.5]], [[-3212.2, 0.0, 5615.5], [-1486.1, 0.0, 5603.1], [240.1, 0.0, 5590.9], [243.0, 0.0, 6000.0], [-3209.4, 0.0, 6000.0], [-3212.2, 0.0, 5615.5]], [[5418.5, 0.0, 5555.2], [6000.0, 0.0, 5551.4], [6000.0, 0.0, 6000.0], [5421.5, 0.0, 6000.0], [5418.5, 0.0, 5555.2]], [[-3279.0, 0.0, -3609.0], [-1551.9, 0.0, -3621.4], [-1538.7, 0.0, -1776.5], [-1525.6, 0.0, 68.4], [201.2, 0.0, 56.2], [214.1, 0.0, 1901.1], [-1512.4, 0.0, 1913.3], [-3239.0, 0.0, 1925.7], [-3252.3, 0.0, 80.8], [-3265.7, 0.0, -1764.1], [-3279.0, 0.0, -3609.0]], [[3692.4, 0.0, 5566.9], [3679.8, 0.0, 3722.0], [3667.2, 0.0, 1877.2], [5393.7, 0.0, 1865.5], [5406.1, 0.0, 3710.3], [5418.5, 0.0, 5555.2], [3692.4, 0.0, 5566.9]], [[-4938.4, 0.0, 5628.2], [-4952.0, 0.0, 3783.2], [-3225.6, 0.0, 3770.6], [-3212.2, 0.0, 5615.5], [-4938.4, 0.0, 5628.2]], [[3642.1, 0.0, -1812.6], [3654.6, 0.0, 32.3], [1927.9, 0.0, 44.1], [1915.1, 0.0, -1800.8], [3642.1, 0.0, -1812.6]], [[240.1, 0.0, 5590.9], [-1486.1, 0.0, 5603.1], [-3212.2, 0.0, 5615.5], [-3225.6, 0.0, 3770.6], [-3239.0, 0.0, 1925.7], [-1512.4, 0.0, 1913.3], [214.1, 0.0, 1901.1], [201.2, 0.0, 56.2], [-1525.6, 0.0, 68.4], [-1538.7, 0.0, -1776.5], [-1551.9, 0.0, -3621.4], [175.3, 0.0, -3633.6], [1902.4, 0.0, -3645.6], [1889.6, 0.0, -5490.5], [3616.9, 0.0, -5502.3], [3629.5, 0.0, -3657.5], [3642.1, 0.0, -1812.6], [1915.1, 0.0, -1800.8], [1927.9, 0.0, 44.1], [3654.6, 0.0, 32.3], [3667.2, 0.0, 1877.2], [3679.8, 0.0, 3722.0], [3692.4, 0.0, 5566.9], [5418.5, 0.0, 5555.2], [5421.5, 0.0, 6000.0], [243.0, 0.0, 6000.0], [240.1, 0.0, 5590.9]], [[-6000.0, 0.0, 5636.0], [-6000.0, 0.0, 100.9], [-4979.1, 0.0, 93.4], [-3252.3, 0.0, 80.8], [-3239.0, 0.0, 1925.7], [-3225.6, 0.0, 3770.6], [-4952.0, 0.0, 3783.2], [-4938.4, 0.0, 5628.2], [-6000.0, 0.0, 5636.0]], [[-3212.2, 0.0, 5615.5], [-3209.4, 0.0, 6000.0], [-4935.6, 0.0, 6000.0], [-4938.4, 0.0, 5628.2], [-3212.2, 0.0, 5615.5]], [[5344.2, 0.0, -5514.0], [5356.6, 0.0, -3669.1], [3629.5, 0.0, -3657.5], [3616.9, 0.0, -5502.3], [5344.2, 0.0, -5514.0]], [[162.3, 0.0, -5478.5], [175.3, 0.0, -3633.6], [-1551.9, 0.0, -3621.4], [-1565.0, 0.0, -5466.3], [162.3, 0.0, -5478.5]], [[5406.1, 0.0, 3710.3], [5393.7, 0.0, 1865.5], [3667.2, 0.0, 1877.2], [3654.6, 0.0, 32.3], [3642.1, 0.0, -1812.6], [3629.5, 0.0, -3657.5], [5356.6, 0.0, -3669.1], [5369.0, 0.0, -1824.3], [6000.0, 0.0, -1828.5], [6000.0, 0.0, 3706.4], [5406.1, 0.0, 3710.3]], [[-5019.7, 0.0, -5441.3], [-5006.1, 0.0, -3596.4], [-3279.0, 0.0, -3609.0], [-3265.7, 0.0, -1764.1], [-4992.6, 0.0, -1751.5], [-4979.1, 0.0, 93.4], [-6000.0, 0.0, 100.9], [-6000.0, 0.0, -5434.1], [-5019.7, 0.0, -5441.3]], [[-1565.0, 0.0, -5466.3], [-3292.4, 0.0, -5453.9], [-3296.3, 0.0, -6000.0], [-1568.8, 0.0, -6000.0], [-1565.0, 0.0, -5466.3]]], "labels": [{"p": [-1484.6, 0.0, 5807.8], "t": "EPM 26777"}, {"p": [1934.3, 0.0, 972.8], "t": "EPM 19483"}, {"p": [-4616.1, 0.0, 2848.2], "t": "EPM 27861"}, {"p": [4824.2, 0.0, -890.2], "t": "EPM 18980"}, {"p": [-4636.1, 0.0, -2680.3], "t": "EPM 25435"}], "aoi": [[4893.2, 0.0, 349.1], [4869.1, 0.0, 839.2], [4797.1, 0.0, 1324.6], [4677.9, 0.0, 1800.5], [4512.6, 0.0, 2262.5], [4302.8, 0.0, 2706.1], [4050.6, 0.0, 3127.0], [3758.3, 0.0, 3521.1], [3428.8, 0.0, 3884.6], [3065.2, 0.0, 4214.2], [2671.1, 0.0, 4506.5], [2250.2, 0.0, 4758.7], [1806.6, 0.0, 4968.5], [1344.6, 0.0, 5133.8], [868.7, 0.0, 5253.0], [383.3, 0.0, 5325.0], [-106.8, 0.0, 5349.1], [-596.9, 0.0, 5325.0], [-1082.2, 0.0, 5253.0], [-1558.2, 0.0, 5133.8], [-2020.2, 0.0, 4968.5], [-2463.8, 0.0, 4758.7], [-2884.6, 0.0, 4506.5], [-3278.7, 0.0, 4214.2], [-3642.3, 0.0, 3884.6], [-3971.8, 0.0, 3521.1], [-4264.1, 0.0, 3127.0], [-4516.4, 0.0, 2706.1], [-4726.2, 0.0, 2262.5], [-4891.5, 0.0, 1800.5], [-5010.7, 0.0, 1324.6], [-5082.7, 0.0, 839.2], [-5106.8, 0.0, 349.1], [-5082.7, 0.0, -141.0], [-5010.7, 0.0, -626.3], [-4891.5, 0.0, -1102.3], [-4726.2, 0.0, -1564.3], [-4516.4, 0.0, -2007.9], [-4264.1, 0.0, -2428.7], [-3971.8, 0.0, -2822.9], [-3642.3, 0.0, -3186.4], [-3278.7, 0.0, -3515.9], [-2884.6, 0.0, -3808.2], [-2463.8, 0.0, -4060.5], [-2020.2, 0.0, -4270.3], [-1558.2, 0.0, -4435.6], [-1082.2, 0.0, -4554.8], [-596.9, 0.0, -4626.8], [-106.8, 0.0, -4650.9], [383.3, 0.0, -4626.8], [868.7, 0.0, -4554.8], [1344.6, 0.0, -4435.6], [1806.6, 0.0, -4270.3], [2250.2, 0.0, -4060.5], [2671.1, 0.0, -3808.2], [3065.2, 0.0, -3515.9], [3428.8, 0.0, -3186.4], [3758.3, 0.0, -2822.9], [4050.6, 0.0, -2428.7], [4302.8, 0.0, -2007.9], [4512.6, 0.0, -1564.3], [4677.9, 0.0, -1102.3], [4797.1, 0.0, -626.3], [4869.1, 0.0, -141.0], [4893.2, 0.0, 349.1]], "tiles": [{"z": 14, "y": 9190, "x": 14556, "c": [[-6799.9, -5342.8], [-4522.6, -5359.6], [-4539.2, -7623.8], [-6816.8, -7607.0]]}, {"z": 14, "y": 9191, "x": 14556, "c": [[-6783.1, -3078.9], [-4506.1, -3095.7], [-4522.6, -5359.6], [-6799.9, -5342.8]]}, {"z": 14, "y": 9192, "x": 14556, "c": [[-6766.2, -815.3], [-4489.6, -832.1], [-4506.1, -3095.7], [-6783.1, -3078.9]]}, {"z": 14, "y": 9193, "x": 14556, "c": [[-6749.4, 1448.0], [-4473.0, 1431.2], [-4489.6, -832.1], [-6766.2, -815.3]]}, {"z": 14, "y": 9194, "x": 14556, "c": [[-6732.5, 3711.0], [-4456.5, 3694.2], [-4473.0, 1431.2], [-6749.4, 1448.0]]}, {"z": 14, "y": 9195, "x": 14556, "c": [[-6715.6, 5973.7], [-4439.9, 5956.8], [-4456.5, 3694.2], [-6732.5, 3711.0]]}, {"z": 14, "y": 9196, "x": 14556, "c": [[-6698.7, 8236.0], [-4423.3, 8219.2], [-4439.9, 5956.8], [-6715.6, 5973.7]]}, {"z": 14, "y": 9190, "x": 14557, "c": [[-4522.6, -5359.6], [-2245.4, -5376.0], [-2261.6, -7640.2], [-4539.2, -7623.8]]}, {"z": 14, "y": 9191, "x": 14557, "c": [[-4506.1, -3095.7], [-2229.2, -3112.1], [-2245.4, -5376.0], [-4522.6, -5359.6]]}, {"z": 14, "y": 9192, "x": 14557, "c": [[-4489.6, -832.1], [-2212.9, -848.6], [-2229.2, -3112.1], [-4506.1, -3095.7]]}, {"z": 14, "y": 9193, "x": 14557, "c": [[-4473.0, 1431.2], [-2196.7, 1414.7], [-2212.9, -848.6], [-4489.6, -832.1]]}, {"z": 14, "y": 9194, "x": 14557, "c": [[-4456.5, 3694.2], [-2180.4, 3677.7], [-2196.7, 1414.7], [-4473.0, 1431.2]]}, {"z": 14, "y": 9195, "x": 14557, "c": [[-4439.9, 5956.8], [-2164.2, 5940.3], [-2180.4, 3677.7], [-4456.5, 3694.2]]}, {"z": 14, "y": 9196, "x": 14557, "c": [[-4423.3, 8219.2], [-2147.9, 8202.6], [-2164.2, 5940.3], [-4439.9, 5956.8]]}, {"z": 14, "y": 9190, "x": 14558, "c": [[-2245.4, -5376.0], [31.9, -5392.2], [16.0, -7656.4], [-2261.6, -7640.2]]}, {"z": 14, "y": 9191, "x": 14558, "c": [[-2229.2, -3112.1], [47.8, -3128.3], [31.9, -5392.2], [-2245.4, -5376.0]]}, {"z": 14, "y": 9192, "x": 14558, "c": [[-2212.9, -848.6], [63.7, -864.7], [47.8, -3128.3], [-2229.2, -3112.1]]}, {"z": 14, "y": 9193, "x": 14558, "c": [[-2196.7, 1414.7], [79.6, 1398.5], [63.7, -864.7], [-2212.9, -848.6]]}, {"z": 14, "y": 9194, "x": 14558, "c": [[-2180.4, 3677.7], [95.5, 3661.5], [79.6, 1398.5], [-2196.7, 1414.7]]}, {"z": 14, "y": 9195, "x": 14558, "c": [[-2164.2, 5940.3], [111.5, 5924.1], [95.5, 3661.5], [-2180.4, 3677.7]]}, {"z": 14, "y": 9196, "x": 14558, "c": [[-2147.9, 8202.6], [127.4, 8186.4], [111.5, 5924.1], [-2164.2, 5940.3]]}, {"z": 14, "y": 9190, "x": 14559, "c": [[31.9, -5392.2], [2309.1, -5408.0], [2293.6, -7672.2], [16.0, -7656.4]]}, {"z": 14, "y": 9191, "x": 14559, "c": [[47.8, -3128.3], [2324.7, -3144.1], [2309.1, -5408.0], [31.9, -5392.2]]}, {"z": 14, "y": 9192, "x": 14559, "c": [[63.7, -864.7], [2340.3, -880.6], [2324.7, -3144.1], [47.8, -3128.3]]}, {"z": 14, "y": 9193, "x": 14559, "c": [[79.6, 1398.5], [2355.9, 1382.7], [2340.3, -880.6], [63.7, -864.7]]}, {"z": 14, "y": 9194, "x": 14559, "c": [[95.5, 3661.5], [2371.5, 3645.6], [2355.9, 1382.7], [79.6, 1398.5]]}, {"z": 14, "y": 9195, "x": 14559, "c": [[111.5, 5924.1], [2387.1, 5908.2], [2371.5, 3645.6], [95.5, 3661.5]]}, {"z": 14, "y": 9196, "x": 14559, "c": [[127.4, 8186.4], [2402.8, 8170.5], [2387.1, 5908.2], [111.5, 5924.1]]}, {"z": 14, "y": 9190, "x": 14560, "c": [[2309.1, -5408.0], [4586.4, -5423.5], [4571.1, -7687.7], [2293.6, -7672.2]]}, {"z": 14, "y": 9191, "x": 14560, "c": [[2324.7, -3144.1], [4601.6, -3159.6], [4586.4, -5423.5], [2309.1, -5408.0]]}, {"z": 14, "y": 9192, "x": 14560, "c": [[2340.3, -880.6], [4616.9, -896.1], [4601.6, -3159.6], [2324.7, -3144.1]]}, {"z": 14, "y": 9193, "x": 14560, "c": [[2355.9, 1382.7], [4632.2, 1367.1], [4616.9, -896.1], [2340.3, -880.6]]}, {"z": 14, "y": 9194, "x": 14560, "c": [[2371.5, 3645.6], [4647.5, 3630.1], [4632.2, 1367.1], [2355.9, 1382.7]]}, {"z": 14, "y": 9195, "x": 14560, "c": [[2387.1, 5908.2], [4662.8, 5892.7], [4647.5, 3630.1], [2371.5, 3645.6]]}, {"z": 14, "y": 9196, "x": 14560, "c": [[2402.8, 8170.5], [4678.1, 8155.0], [4662.8, 5892.7], [2387.1, 5908.2]]}, {"z": 14, "y": 9190, "x": 14561, "c": [[4586.4, -5423.5], [6863.6, -5438.7], [6848.7, -7702.8], [4571.1, -7687.7]]}, {"z": 14, "y": 9191, "x": 14561, "c": [[4601.6, -3159.6], [6878.6, -3174.8], [6863.6, -5438.7], [4586.4, -5423.5]]}, {"z": 14, "y": 9192, "x": 14561, "c": [[4616.9, -896.1], [6893.5, -911.3], [6878.6, -3174.8], [4601.6, -3159.6]]}, {"z": 14, "y": 9193, "x": 14561, "c": [[4632.2, 1367.1], [6908.5, 1351.9], [6893.5, -911.3], [4616.9, -896.1]]}, {"z": 14, "y": 9194, "x": 14561, "c": [[4647.5, 3630.1], [6923.4, 3614.8], [6908.5, 1351.9], [4632.2, 1367.1]]}, {"z": 14, "y": 9195, "x": 14561, "c": [[4662.8, 5892.7], [6938.4, 5877.4], [6923.4, 3614.8], [4647.5, 3630.1]]}, {"z": 14, "y": 9196, "x": 14561, "c": [[4678.1, 8155.0], [6953.4, 8139.7], [6938.4, 5877.4], [4662.8, 5892.7]]}], "basemaps": [{"id": "global", "photo": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}", "map": "https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}", "labels": "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}", "attr": "Basemap \u00a9 Esri & contributors"}, {"id": "local", "photo": "https://spatial-img.information.qld.gov.au/arcgis/rest/services/Basemaps/LatestStateProgram_AllUsers/ImageServer/tile/{z}/{y}/{x}", "map": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Basemaps/QldMap_Topo/MapServer/tile/{z}/{y}/{x}", "labels": "https://spatial-gis.information.qld.gov.au/arcgis/rest/services/Basemaps/QldImageryLabel/MapServer/tile/{z}/{y}/{x}", "attr": "Basemap \u00a9 State of Queensland (CC-BY); imagery fill \u00a9 Planet Labs"}]};
+const canvas=document.getElementById('c'),tip=document.getElementById('tip');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setPixelRatio(devicePixelRatio);
+const scene=new THREE.Scene(); scene.background=new THREE.Color(0xffffff);
+const camera=new THREE.PerspectiveCamera(55,2,1,40000);
+camera.position.set(500,150,750);
+const controls=new OrbitControls(camera,canvas);
+controls.target.set(0,-180,0); controls.autoRotate=true; controls.autoRotateSpeed=.6;
+scene.add(new THREE.HemisphereLight(0xffffff,0xdddddd,1.1));
+const dir=new THREE.DirectionalLight(0xffffff,1.1); dir.position.set(500,800,300); scene.add(dir);
+
+// ── basemap ground: textured quads — source × style + label overlay ──
+const loader=new THREE.TextureLoader(); loader.setCrossOrigin('anonymous');
+const groups={}, baseMats=[], op=document.getElementById('op');
+function buildLayer(key,tpl,y,isBase){
+ const grp=new THREE.Group(); grp.visible=false; scene.add(grp); groups[key]=grp;
+ D.tiles.forEach(t=>{
+  const [sw,se,ne,nw]=t.c;
+  const g=new THREE.BufferGeometry();
+  g.setAttribute('position',new THREE.BufferAttribute(new Float32Array([
+    sw[0],y,sw[1], se[0],y,se[1], ne[0],y,ne[1], nw[0],y,nw[1]]),3));
+  g.setIndex([0,2,1, 0,3,2]);
+  g.setAttribute('uv',new THREE.BufferAttribute(new Float32Array([0,0, 1,0, 1,1, 0,1]),2));
+  g.computeVertexNormals();
+  loader.load(tpl.replace('{z}',t.z).replace('{y}',t.y).replace('{x}',t.x),
+   tex=>{tex.colorSpace=THREE.SRGBColorSpace;
+    const m=new THREE.MeshLambertMaterial({map:tex,transparent:true,
+      opacity:isBase?op.value/100:1,side:THREE.DoubleSide});
+    if(isBase) baseMats.push(m);
+    grp.add(new THREE.Mesh(g,m));},undefined,()=>{});
+ });
+}
+const ui={src:'global',style:'off',labels:false};
+function refreshBasemap(){
+ Object.values(groups).forEach(g=>g.visible=false);
+ const bm=D.basemaps.find(b=>b.id===ui.src);
+ if(ui.style!=='off'&&bm[ui.style]){
+  const k=ui.src+':'+ui.style;
+  if(!groups[k]) buildLayer(k,bm[ui.style],0,true);
+  groups[k].visible=true;}
+ if(ui.labels&&bm.labels){
+  const k=ui.src+':labels';
+  if(!groups[k]) buildLayer(k,bm.labels,1.5,false);
+  groups[k].visible=true;}
+ document.getElementById('attr').textContent=
+  ((ui.style!=='off'||ui.labels)?bm.attr+' · ':'')+'Tenure © State of Queensland';
+}
+// faint fallback plane just below the tiles
+const ground=new THREE.Mesh(new THREE.PlaneGeometry(13000,13000),
+ new THREE.MeshLambertMaterial({color:0xEDF2ED,transparent:true,opacity:.25,side:THREE.DoubleSide}));
+ground.rotation.x=-Math.PI/2; ground.position.y=-2; scene.add(ground);
+
+// ── tenement boundaries + AOI ──
+function ring(coords,color,dashed,y){
+ const pts=coords.map(p=>new THREE.Vector3(p[0],y,p[2]));
+ const g=new THREE.BufferGeometry().setFromPoints(pts);
+ const m=dashed?new THREE.LineDashedMaterial({color,dashSize:60,gapSize:40})
+               :new THREE.LineBasicMaterial({color});
+ const l=new THREE.Line(g,m); if(dashed) l.computeLineDistances(); scene.add(l);}
+D.rings.forEach(r=>ring(r,0xD9A441,false,3));
+if(D.aoi.length) ring(D.aoi,0xFF6B35,true,3);
+
+// ── text sprites (permit labels, north arrow) ──
+function textSprite(txt,color,outline){
+ const m=document.createElement('canvas').getContext('2d');
+ m.font='bold 48px sans-serif';
+ const w=Math.ceil(m.measureText(txt).width);
+ const c=document.createElement('canvas'); c.width=w+28; c.height=72;
+ const x=c.getContext('2d'); x.font='bold 48px sans-serif';
+ x.lineWidth=9; x.strokeStyle=outline; x.strokeText(txt,14,52);
+ x.fillStyle=color; x.fillText(txt,14,52);
+ const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+ s.scale.set(c.width*1.6,c.height*1.6,1);
+ return s;}
+D.labels.forEach(L=>{const s=textSprite(L.t,'#FFD978','#16202E');
+ s.position.set(L.p[0],60,L.p[2]); scene.add(s);});
+const north=textSprite('N','#16202E','#FFFFFF'); north.position.set(0,120,-5600); scene.add(north);
+
+// ── drill tubes ──
+const picks=[];
+function tube(a,b,radius,color,info){
+ const va=new THREE.Vector3(...a), vb=new THREE.Vector3(...b);
+ const d=new THREE.Vector3().subVectors(vb,va), len=Math.max(d.length(),1);
+ const mesh=new THREE.Mesh(new THREE.CylinderGeometry(radius,radius,len,12),
+   new THREE.MeshLambertMaterial({color}));
+ mesh.position.copy(va).addScaledVector(d,.5);
+ mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());
+ if(info){mesh.userData.info=info;picks.push(mesh);} scene.add(mesh);}
+const cuColor=cu=>cu>=4?0xDC2626:cu>=1?0xF59E0B:0x14B8A6;
+D.traces.forEach(t=>tube(t.a,t.b,2.5,0x9CA3AF,t.id+' — trace'));
+D.intervals.forEach(i=>tube(i.a,i.b,8,cuColor(i.cu),i.label));
+D.collars.forEach(c=>tube([c.p[0],c.p[1]+5,c.p[2]],[c.p[0],c.p[1]-5,c.p[2]],10,0x16202E,
+ c.id+' · TD '+c.depth+' m · source: '+c.src));
+
+// ── interactions ──
+const ray=new THREE.Raycaster(),mouse=new THREE.Vector2();
+addEventListener('pointermove',e=>{
+ mouse.set(e.clientX/innerWidth*2-1,-(e.clientY/innerHeight)*2+1);
+ ray.setFromCamera(mouse,camera);
+ const hit=ray.intersectObjects(picks)[0];
+ if(hit){tip.style.display='block';tip.style.left=(e.clientX+14)+'px';
+   tip.style.top=(e.clientY+14)+'px';tip.textContent=hit.object.userData.info;}
+ else tip.style.display='none';});
+document.getElementById('rot').onchange=e=>controls.autoRotate=e.target.checked;
+document.querySelectorAll('input[name=src]').forEach(r=>r.onchange=e=>{ui.src=e.target.value;refreshBasemap();});
+document.querySelectorAll('input[name=style]').forEach(r=>r.onchange=e=>{ui.style=e.target.value;refreshBasemap();});
+document.getElementById('lab').onchange=e=>{ui.labels=e.target.checked;refreshBasemap();};
+op.oninput=e=>baseMats.forEach(m=>m.opacity=e.target.value/100);
+refreshBasemap();
+
+function resize(){const w=canvas.clientWidth,h=canvas.clientHeight;
+ if(canvas.width!==w||canvas.height!==h){renderer.setSize(w,h,false);
+  camera.aspect=w/h;camera.updateProjectionMatrix();}}
+(function loop(){resize();controls.update();renderer.render(scene,camera);
+ requestAnimationFrame(loop);})();
+</script></body></html>

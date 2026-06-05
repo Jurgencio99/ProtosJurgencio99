@@ -25,6 +25,12 @@ Any change that makes "the map" look like the product works against the pitch.
 - No Tailwind, no CSS framework — styling is an inlined `<style>` block (Civitta palette:
   cream/navy/terracotta; Fraunces display + Geist body). No map library; the plan view is
   hand-plotted SVG.
+- **3D drill view**: `public/drill3d.html` — a self-contained Three.js file embedded via
+  `<iframe src="/drill3d.html">` in the "3D drill view" nav tab (AOI 1 / Mt Isa only;
+  shows empty state for AOI 2). Three.js is intentionally NOT imported into the React
+  bundle — it lives solely inside the standalone HTML file. Basemap defaults to "off" so
+  the demo never depends on a third-party tile server at load; photo/map options remain
+  available in the HUD for those who want them.
 - Desktop-only layout by design.
 - `npm run dev` to preview, `npm run build` to produce `dist/`.
 
@@ -48,6 +54,10 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 - **AOI 1 — "Mt Isa"**: the original proof-of-concept run. Centre (385857, 7623831),
   5 km radius. 5 tenements, 3 listed companies (Carnaby Resources / C29 Metals /
   Hammer Metals), 18 drill collars extracted from real ASX announcement PDFs.
+  The 2D collar table (in `App.jsx`) carries hole ID, coordinates, total depth,
+  holder, and source PDF. The **3D view** (`public/drill3d.html`) also has real
+  per-hole **assay intervals (Cu% and Au g/t) and downhole survey traces**,
+  extracted from the same ASX announcements — confirmed pipeline output, not mock.
 - **AOI 2 — "North belt"**: a genuine *fresh* run on a new area 58 km north
   (394300, 7681000, 5 km). 7 tenements; 6 held by "MT. DOCKERELL MINING PTY LTD" all
   resolve to Hammer Metals (the holder→listed map generalising to permits never seen);
@@ -64,12 +74,13 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 ## Things that are intentionally the way they are — do not "helpfully" change
 
 - **Commodity (Cu/Au/Co) and date filters are marked "preview" — not active filters.** The
-  PoC collar data has no per-hole commodity or date, so the controls are deliberately
-  disabled, badged "Preview" in the toolbar, and explained by a muted helper line + hover
-  tooltip stating they're placeholders for a production data source. Do NOT fabricate
-  commodity/date values to make them "work", and do NOT re-enable them without a real
-  per-hole data source behind them. The honest next step is to wire them to such a source.
-  In a verification tool a control that fakes interactivity is a liability.
+  2D collar table in `App.jsx` carries no per-hole commodity or date, so the toolbar filters
+  are deliberately disabled, badged "Preview", and explained by a muted helper line + hover
+  tooltip. Do NOT fabricate commodity/date values to make them "work", and do NOT re-enable
+  them without a real per-hole data source behind them. The honest next step is to wire them
+  to such a source. Note: the **3D view** (`public/drill3d.html`) DOES have real Cu%/Au g/t
+  assay intervals for AOI 1 — these are a separate dataset inside that file and do not
+  feed the 2D toolbar filters. In a verification tool a control that fakes interactivity is a liability.
 - **Insight callouts are hand-authored narrative** grounded in the real data (e.g. the
   "Carnaby's holes straddle two other holders' permits" finding is verified by a real
   point-in-polygon test). They are flagged in code comments. If you change the data, update
