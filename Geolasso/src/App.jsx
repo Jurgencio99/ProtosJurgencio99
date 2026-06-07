@@ -41,11 +41,11 @@ const MTISA = {
   provenance: "Original PoC run · full pipeline (spatial + resolution + extraction)",
   aoi: { east: 385857, north: 7623831, zone: "MGA94 z54", radius: 5000 },
   tenements: [
-    { permit: "EPM 26777", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 0 },
-    { permit: "EPM 19483", status: "Granted", holder: "C29 METALS LIMITED", listed: "C29 Metals", dist: 291 },
-    { permit: "EPM 27861", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 3144 },
-    { permit: "EPM 18980", status: "Granted", holder: "CARNABY RESOURCES (HOLDINGS) PTY LTD", listed: "Carnaby Resources", dist: 3763 },
-    { permit: "EPM 25435", status: "Granted", holder: "CARNABY RESOURCES (HOLDINGS) PTY LTD", listed: "Carnaby Resources", dist: 3801 },
+    { permit: "EPM 26777", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 0,    approved: "2018-11-16", expiry: "2028-11-15" },
+    { permit: "EPM 19483", status: "Granted", holder: "C29 METALS LIMITED", listed: "C29 Metals", dist: 291,              approved: "2014-03-11", expiry: "2028-03-10" },
+    { permit: "EPM 27861", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 3144, approved: "2021-10-05", expiry: "2026-10-04" },
+    { permit: "EPM 18980", status: "Granted", holder: "CARNABY RESOURCES (HOLDINGS) PTY LTD", listed: "Carnaby Resources", dist: 3763, approved: "2014-02-11", expiry: "2029-02-10" },
+    { permit: "EPM 25435", status: "Granted", holder: "CARNABY RESOURCES (HOLDINGS) PTY LTD", listed: "Carnaby Resources", dist: 3801, approved: "2014-09-03", expiry: "2029-09-02" },
   ],
   collars: [
     { hole: "CBDD017W2", e: 385857, n: 7623831, depth: 718, co: "Carnaby Resources", src: "03071772_PA_koordinaatidega.pdf" },
@@ -80,12 +80,42 @@ const MTISA = {
   geom: [{"permit":"EPM 26777","listed":"Hammer Metals","dist":0,"rings":[[[-6859,35296],[-5128,35308],[-3398,35321],[-1667,35333],[63,35345],[76,33500],[89,31656],[-1641,31643],[-1628,29799],[102,29811],[1831,29823],[1844,27978],[3574,27990],[5303,28001],[5316,26156],[5328,24312],[7057,24323],[8786,24334],[8798,22489],[7069,22478],[7081,20633],[7093,18788],[7106,16944],[5377,16932],[5365,18777],[5352,20622],[5340,22467],[3611,22455],[3624,20610],[3636,18765],[3649,16921],[3661,15076],[3674,13231],[3686,11386],[1958,11374],[1971,9529],[243,9517],[256,7672],[1984,7684],[1996,5840],[2009,3995],[282,3983],[269,5828],[-1458,5815],[-1471,7660],[-1485,9505],[-1498,11350],[-1511,13195],[-1524,15040],[204,15052],[192,16897],[1920,16909],[1907,18754],[179,18742],[166,20586],[153,22431],[-1576,22419],[-1563,20574],[-3292,20562],[-3279,18717],[-5008,18705],[-5021,20549],[-5035,22394],[-6764,22382],[-6777,24227],[-5048,24239],[-5061,26084],[-5075,27929],[-6804,27916],[-6818,29761],[-6832,31606],[-6845,33451],[-6859,35296]],[[-3105,-5266],[-1379,-5254],[347,-5242],[360,-7087],[2086,-7075],[2099,-8919],[2111,-10764],[386,-10776],[373,-8932],[-1353,-8944],[-1340,-10789],[-3065,-10801],[-3079,-8956],[-3092,-7111],[-3105,-5266]],[[5525,-5206],[7251,-5195],[7264,-7039],[7276,-8884],[7288,-10729],[7300,-12574],[7313,-14419],[7325,-16264],[7337,-18109],[5612,-18120],[5600,-16275],[5587,-14431],[5575,-12586],[5563,-10741],[5550,-8896],[5538,-7051],[5525,-5206]],[[-10166,14976],[-8437,14989],[-8451,16834],[-6723,16847],[-6709,15002],[-6695,13157],[-8423,13144],[-8409,11299],[-6681,11312],[-6668,9467],[-8396,9455],[-10123,9441],[-10137,11286],[-10151,13131],[-10166,14976]],[[8739,31713],[10469,31724],[10481,29880],[10492,28035],[12222,28046],[13952,28056],[13963,26212],[12233,26201],[10504,26190],[8775,26179],[8763,28024],[8751,29869],[8739,31713]],[[1768,39047],[3499,39058],[3512,37214],[3524,35369],[3536,33524],[3549,31679],[1819,31667],[1806,33512],[1794,35357],[1781,37202],[1768,39047]],[[-3159,2113],[-3172,3958],[-1445,3971],[-1432,2126],[-1419,281],[308,293],[321,-1552],[-1406,-1564],[-3132,-1577],[-3146,268],[-3159,2113]],[[12165,37270],[13895,37280],[13907,35435],[13918,33591],[13929,31746],[12199,31735],[12188,33580],[12176,35425],[12165,37270]],[[-10334,37115],[-8603,37128],[-8589,35283],[-8576,33438],[-8562,31593],[-10292,31580],[-10306,33425],[-10320,35270],[-10334,37115]],[[-1340,-10789],[386,-10776],[399,-12621],[412,-14466],[-1313,-14479],[-1326,-12634],[-1340,-10789]],[[3774,-1528],[5500,-1516],[5513,-3361],[5525,-5206],[3799,-5218],[3787,-3373],[3774,-1528]],[[2111,-10764],[3837,-10752],[3850,-12597],[2124,-12609],[2111,-10764]],[[-4845,-3434],[-3119,-3422],[-3105,-5266],[-4832,-5279],[-4845,-3434]],[[2022,2150],[3749,2162],[3761,317],[2035,305],[2022,2150]],[[412,-14466],[2137,-14454],[2150,-16299],[425,-16311],[412,-14466]],[[-1287,-18168],[438,-18156],[451,-20001],[-1273,-20013],[-1287,-18168]],[[-10222,22356],[-8493,22369],[-8479,20524],[-10208,20511],[-10222,22356]]]},{"permit":"EPM 19483","listed":"C29 Metals","dist":291,"rings":[[[-1445,3971],[282,3983],[2009,3995],[1996,5840],[3724,5851],[3736,4007],[3749,2162],[2022,2150],[2035,305],[3761,317],[3774,-1528],[3787,-3373],[3799,-5218],[5525,-5206],[5538,-7051],[5550,-8896],[5563,-10741],[5575,-12586],[5587,-14431],[5600,-16275],[3875,-16287],[2150,-16299],[2137,-14454],[3862,-14442],[3850,-12597],[3837,-10752],[2111,-10764],[2099,-8919],[2086,-7075],[360,-7087],[347,-5242],[-1379,-5254],[-3105,-5266],[-3119,-3422],[-3132,-1577],[-1406,-1564],[321,-1552],[308,293],[-1419,281],[-1432,2126],[-1445,3971]],[[-1353,-8944],[373,-8932],[386,-10776],[-1340,-10789],[-1353,-8944]]]},{"permit":"EPM 27861","listed":"Hammer Metals","dist":3144,"rings":[[[-10053,217],[-8326,230],[-6599,243],[-4872,256],[-3146,268],[-3132,-1577],[-3119,-3422],[-4845,-3434],[-4832,-5279],[-6558,-5292],[-6572,-3447],[-8298,-3460],[-10024,-3473],[-10038,-1628],[-10053,217]],[[-11851,9428],[-10123,9441],[-10109,7597],[-8382,7610],[-8368,5765],[-8354,3920],[-10081,3907],[-10067,2062],[-10053,217],[-11779,203],[-11794,2048],[-11808,3893],[-11822,5738],[-11837,7583],[-11851,9428]],[[-3052,-12646],[-3065,-10801],[-1340,-10789],[-1326,-12634],[-1313,-14479],[-3038,-14491],[-3052,-12646]],[[-4818,-7124],[-4832,-5279],[-3105,-5266],[-3092,-7111],[-4818,-7124]],[[243,9517],[1971,9529],[1984,7684],[256,7672],[243,9517]],[[3724,5851],[5451,5863],[5463,4018],[3736,4007],[3724,5851]],[[-1458,5815],[269,5828],[282,3983],[-1445,3971],[-1458,5815]]]},{"permit":"EPM 18980","listed":"Carnaby Resources","dist":3763,"rings":[[[3736,4007],[5463,4018],[5476,2173],[7203,2185],[7215,340],[7227,-1505],[7239,-3350],[5513,-3361],[5500,-1516],[3774,-1528],[3761,317],[3749,2162],[3736,4007]]]},{"permit":"EPM 25435","listed":"Carnaby Resources","dist":3801,"rings":[[[-8354,3920],[-6627,3933],[-6640,5778],[-4913,5790],[-4899,3946],[-3172,3958],[-3159,2113],[-4886,2101],[-4872,256],[-6599,243],[-6613,2088],[-8340,2075],[-8354,3920]],[[-3199,7648],[-1471,7660],[-1458,5815],[-3186,5803],[-3199,7648]],[[-4954,11325],[-3226,11338],[-3212,9493],[-4940,9480],[-4954,11325]],[[-3292,20562],[-1563,20574],[-1550,18729],[-3279,18717],[-3292,20562]],[[-8423,13144],[-6695,13157],[-6681,11312],[-8409,11299],[-8423,13144]],[[-10123,9441],[-8396,9455],[-6668,9467],[-6654,7623],[-8382,7610],[-10109,7597],[-10123,9441]],[[-6736,18692],[-5008,18705],[-4994,16860],[-6723,16847],[-6736,18692]],[[-10194,18666],[-8465,18679],[-8451,16834],[-8437,14989],[-10166,14976],[-10180,16821],[-10194,18666]]]}],
 };
 
+/* ─────────────────────────────── Assay intervals — AOI 1 (Mt Isa only) ─────────────────────────────── */
+const ASSAYS_MTISA = {
+  "CBDD017W2": { td:718, src:"03071772.pdf", best:{from:585,to:593,width:8.0,cu:2.4,au:2.9}, intervals:[{from:585,to:593,width:8.0,cu:2.4,au:2.9},{from:606,to:618,width:12.4,cu:0.5,au:0.1}] },
+  "CBDD017W3": { td:694, src:"03071772.pdf", best:{from:605,to:614,width:8.7,cu:1.0,au:0.1}, intervals:[{from:605,to:614,width:8.7,cu:1.0,au:0.1}] },
+  "CBDD017W5": { td:594, src:"03071772.pdf", best:{from:485,to:493,width:8.1,cu:8.0,au:2.2}, intervals:[{from:485,to:493,width:8.1,cu:8.0,au:2.2}] },
+  "CBDD017W7": { td:550, src:"03071772.pdf", best:{from:475,to:479,width:4.2,cu:8.2,au:0.5}, intervals:[{from:475,to:479,width:4.2,cu:8.2,au:0.5}] },
+  "CBDD058":   { td:72,  src:"03055699.pdf", best:{from:2,to:42,width:40.5,cu:0.5,au:0.2}, intervals:[{from:2,to:42,width:40.5,cu:0.5,au:0.2}] },
+  "CBRC034":   { td:250, src:"03055699.pdf", best:{from:205,to:220,width:15.0,cu:0.9,au:0.1}, intervals:[{from:205,to:220,width:15.0,cu:0.9,au:0.1}] },
+  "CBRC037":   { td:474, src:"03063808.pdf", best:{from:375,to:379,width:4.0,cu:0.4,au:0.1}, intervals:[{from:366,to:368,width:2.0,cu:0.4,au:0.1},{from:375,to:379,width:4.0,cu:0.4,au:0.1}] },
+  "CBRC053":   { td:396, src:"03063808.pdf", best:{from:218,to:239,width:21.0,cu:0.8,au:0.1}, intervals:[{from:209,to:211,width:2.0,cu:0.6,au:0.2},{from:218,to:239,width:21.0,cu:0.8,au:0.1},{from:345,to:378,width:33.0,cu:0.4,au:0.1}] },
+  "CBRC055":   { td:50,  src:"03055699.pdf", best:{from:35,to:42,width:7.0,cu:7.0,au:2.3}, intervals:[{from:1,to:20,width:19.0,cu:0.6,au:1.0},{from:35,to:42,width:7.0,cu:7.0,au:2.3}] },
+  "CBRC056":   { td:65,  src:"03055699.pdf", best:{from:25,to:59,width:34.0,cu:1.8,au:0.6}, intervals:[{from:25,to:59,width:34.0,cu:1.8,au:0.6}] },
+  "CBRC057":   { td:78,  src:"03055699.pdf", best:{from:7,to:78,width:71.0,cu:1.0,au:0.1}, intervals:[{from:7,to:78,width:71.0,cu:1.0,au:0.1}] },
+  "CBRC059":   { td:188, src:"03063808.pdf", best:{from:163,to:170,width:7.0,cu:0.5,au:0.1}, intervals:[{from:89,to:110,width:21.0,cu:0.4,au:0.05},{from:163,to:170,width:7.0,cu:0.5,au:0.1}] },
+  "CBRC060":   { td:222, src:"03063808.pdf", best:{from:125,to:135,width:10.0,cu:0.4,au:0.1}, intervals:[{from:125,to:135,width:10.0,cu:0.4,au:0.1},{from:168,to:203,width:35.0,cu:0.3,au:0.1}] },
+  "CBRC061":   { td:161, src:"03055699.pdf", best:{from:104,to:137,width:33.0,cu:0.6,au:0.2}, intervals:[{from:104,to:137,width:33.0,cu:0.6,au:0.2}] },
+  "CBRC062":   { td:168, src:"03055699.pdf", best:{from:77,to:105,width:28.0,cu:0.2,au:0.04}, intervals:[{from:77,to:105,width:28.0,cu:0.2,au:0.04}] },
+  "CBRC063":   { td:192, src:"03063808.pdf", best:{from:70,to:73,width:3.0,cu:3.5,au:0.2}, intervals:[{from:52,to:54,width:2.0,cu:0.9,au:0.1},{from:70,to:73,width:3.0,cu:3.5,au:0.2},{from:105,to:140,width:35.0,cu:2.3,au:0.6},{from:162,to:186,width:24.0,cu:0.5,au:0.1}] },
+  "CBRC064":   { td:128, src:"03063808.pdf", best:{from:83,to:87,width:4.0,cu:1.1,au:0.1}, intervals:[{from:83,to:87,width:4.0,cu:1.1,au:0.1}] },
+  "CBRC067":   { td:330, src:"03063808.pdf", best:{from:250,to:253,width:3.0,cu:1.3,au:0.4}, intervals:[{from:159,to:175,width:16.0,cu:0.8,au:0.04},{from:186,to:197,width:11.0,cu:1.1,au:0.6},{from:250,to:253,width:3.0,cu:1.3,au:0.4}] },
+};
+
 /* ─────────────────────────────── AREA 2: North belt (fresh run) ─────────────────────────────── */
 const NORTHBELT = {
   id: "northbelt", name: "North belt (fresh run)", region: "NW Queensland · 58 km N of Mt Isa",
   provenance: "Live fresh run · spatial + entity resolution on the full QLD layer (2,621 permits) · extraction corpus not loaded",
   aoi: { east: 394300, north: 7681000, zone: "MGA94 z54", radius: 5000 },
-  tenements: [], collars: [],
+  tenements: [
+    { permit: "EPM 26694", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 0,    approved: "2018-12-13", expiry: "2028-12-12" },
+    { permit: "EPM 26775", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 134,  approved: "2018-11-16", expiry: "2028-11-15" },
+    { permit: "EPM 14019", status: "Granted", holder: "Mulga Minerals Pty Ltd",        listed: null,           dist: 1642, approved: "2003-07-18", expiry: "2027-07-17" },
+    { permit: "EPM 27470", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 2378, approved: "2020-11-12", expiry: "2030-11-11" },
+    { permit: "EPM 11919", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 2732, approved: "2003-07-16", expiry: "2030-07-15" },
+    { permit: "EPM 26776", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 2897, approved: "2018-11-16", expiry: "2028-11-15" },
+    { permit: "EPM 26904", status: "Granted", holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals", dist: 4060, approved: "2019-04-30", expiry: "2029-04-29" },
+  ], collars: [],
   resolution: [
     { holder: "MT. DOCKERELL MINING PTY LTD", listed: "Hammer Metals" },
     { holder: "Mulga Minerals Pty Ltd", listed: null },
@@ -99,6 +129,9 @@ const NORTHBELT = {
 
 const AREAS = { mtisa: MTISA, northbelt: NORTHBELT };
 const distOf = (c, aoi) => Math.round(Math.hypot(c.e - aoi.east, c.n - aoi.north));
+const TODAY = new Date("2026-06-06");
+const daysToExpiry = (expiryStr) => Math.round((new Date(expiryStr) - TODAY) / 86400000);
+const cuColor = (cu) => cu >= 4 ? "#DC2626" : cu >= 1 ? "#F59E0B" : "#14B8A6";
 
 /* ─────────────────────────────── styles ─────────────────────────────── */
 function Styles() {
@@ -369,6 +402,9 @@ export default function App() {
   const cos = useMemo(() => [...new Set(tenements.map((t) => t.listed).filter(Boolean))], [tenements]);
   const unresolved = useMemo(() => [...new Set(A.tenements.filter((t) => t.dist <= radius && !t.listed).map((t) => t.holder))], [A, radius]);
   const deepest = collars.reduce((m, c) => Math.max(m, c.depth), 0);
+  const bestInterceptHole = areaId === "mtisa"
+    ? Object.values(ASSAYS_MTISA).reduce((b, h) => h.best.cu > (b?.cu ?? -1) ? h.best : b, null)
+    : null;
   const withData = A.coverage.filter((c) => c.collars > 0).length;
 
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
@@ -459,7 +495,7 @@ export default function App() {
               <Kpi label="Tenements" value={tenements.length + unresolved.length ? visibleGeom.length : 0} sub="granted permits in area" icon={<Layers size={13} />} />
               <Kpi label="Listed holders" value={cos.length} sub={unresolved.length ? `${unresolved.length} unresolved` : `${withData} with disclosures`} icon={<Building2 size={13} />} pill={unresolved.length ? "+ flagged" : null} pillType="warn" />
               <Kpi label="Drill collars" value={collars.length} sub={collars.length ? "extracted from PDFs" : "none this run"} icon={<Target size={13} />} pill={collars.length ? "0 typed" : null} />
-              <Kpi label="Deepest hole" value={deepest ? deepest + " m" : "—"} sub="total depth, this AOI" icon={<Activity size={13} />} />
+              <Kpi label="Best intercept" value={bestInterceptHole ? `${bestInterceptHole.width} m @ ${bestInterceptHole.cu}% Cu` : "—"} sub={bestInterceptHole ? `${bestInterceptHole.au} g/t Au · best in AOI` : "no assays this run"} icon={<Activity size={13} />} />
             </div>
 
             <div className="grid" style={{ gridTemplateColumns: "minmax(360px,1fr) 1.25fr" }}>
@@ -505,17 +541,28 @@ export default function App() {
                     <table>
                       <thead><tr><th>Permit</th><th>Registered holder</th><th>Listed entity</th><th style={{ textAlign: "right" }}>Dist</th></tr></thead>
                       <tbody>
-                        {visibleGeom.map((t) => (
-                          <tr key={t.permit}>
-                            <td className="mono" style={{ fontWeight: 600 }}>{t.permit}</td>
-                            <td style={{ color: "var(--ink-muted)", fontSize: 11.5 }}>{t.holder || A.tenements.find((x) => x.permit === t.permit)?.holder}</td>
-                            <td>
-                              <span className="swatch" style={{ background: colorFor(t.listed) }} />
-                              {t.listed || <span style={{ color: "var(--ink-muted)" }}>{(t.holder || "").replace(/ PTY LTD/i, "")} <span className="pill pill-gray" style={{ marginLeft: 4 }}>unmapped</span></span>}
-                            </td>
-                            <td className="mono" style={{ textAlign: "right" }}>{t.dist === 0 ? "in" : (t.dist >= 1000 ? (t.dist / 1000).toFixed(1) + " km" : t.dist + " m")}</td>
-                          </tr>
-                        ))}
+                        {visibleGeom.map((t) => {
+                          const tData = A.tenements.find((x) => x.permit === t.permit);
+                          const xDays = tData?.expiry ? daysToExpiry(tData.expiry) : null;
+                          return (
+                            <tr key={t.permit}>
+                              <td className="mono" style={{ fontWeight: 600 }}>
+                                {t.permit}
+                                {xDays !== null && xDays <= 180 && (
+                                  xDays > 0
+                                    ? <span className="pill pill-warn" style={{ marginLeft: 6, fontSize: 10 }}>expires in ~{xDays} d</span>
+                                    : <span className="pill pill-gray" style={{ marginLeft: 6, fontSize: 10 }}>renewal due</span>
+                                )}
+                              </td>
+                              <td style={{ color: "var(--ink-muted)", fontSize: 11.5 }}>{t.holder || tData?.holder}</td>
+                              <td>
+                                <span className="swatch" style={{ background: colorFor(t.listed) }} />
+                                {t.listed || <span style={{ color: "var(--ink-muted)" }}>{(t.holder || "").replace(/ PTY LTD/i, "")} <span className="pill pill-gray" style={{ marginLeft: 4 }}>unmapped</span></span>}
+                              </td>
+                              <td className="mono" style={{ textAlign: "right" }}>{t.dist === 0 ? "in" : (t.dist >= 1000 ? (t.dist / 1000).toFixed(1) + " km" : t.dist + " m")}</td>
+                            </tr>
+                          );
+                        })}
                       </tbody>
                     </table>
                   </div>
@@ -564,21 +611,33 @@ export default function App() {
                     </div>
                   </div>
                   <div className="card">
-                    <div className="card-h"><div className="card-t">Collar table</div><div className="card-st mono">HoleID · E · N · TD · source</div></div>
+                    <div className="card-h"><div className="card-t">Intercept table</div><div className="card-st mono">sorted by best Cu% · E/N in CSV export</div></div>
                     <div className="card-b" style={{ paddingTop: 4, maxHeight: 520, overflow: "auto" }}>
                       <table>
-                        <thead><tr><th>Hole</th><th style={{ textAlign: "right" }}>Easting</th><th style={{ textAlign: "right" }}>Northing</th><th style={{ textAlign: "right" }}>TD</th><th>Source PDF</th></tr></thead>
+                        <thead><tr><th>Hole</th><th>Best intercept</th><th style={{ textAlign: "right" }}>TD</th><th>Company</th><th>Source PDF</th></tr></thead>
                         <tbody>
-                          {[...collars].sort((a, b) => b.depth - a.depth).map((c) => (
-                            <tr key={c.hole} className={c.depth >= 550 ? "hl" : ""}
-                              onMouseEnter={() => setHovered(c.hole)} onMouseLeave={() => setHovered(null)}>
-                              <td className="mono" style={{ fontWeight: 600 }}><span className="swatch" style={{ background: colorFor(c.co) }} />{c.hole}</td>
-                              <td className="mono" style={{ textAlign: "right" }}>{c.e.toLocaleString()}</td>
-                              <td className="mono" style={{ textAlign: "right" }}>{c.n.toLocaleString()}</td>
-                              <td className="mono" style={{ textAlign: "right", fontWeight: 600 }}>{c.depth}</td>
-                              <td className="mono" style={{ fontSize: 10.5, color: "var(--ink-soft)" }}><FileText size={11} style={{ verticalAlign: "-1px", marginRight: 4 }} />{c.src.replace("_PA_koordinaatidega", "")}</td>
-                            </tr>
-                          ))}
+                          {[...collars].sort((a, b) => {
+                            const ba = ASSAYS_MTISA[a.hole]?.best?.cu ?? -1;
+                            const bb = ASSAYS_MTISA[b.hole]?.best?.cu ?? -1;
+                            return bb - ba;
+                          }).map((c) => {
+                            const best = ASSAYS_MTISA[c.hole]?.best;
+                            return (
+                              <tr key={c.hole}
+                                onMouseEnter={() => setHovered(c.hole)} onMouseLeave={() => setHovered(null)}>
+                                <td className="mono" style={{ fontWeight: 600 }}><span className="swatch" style={{ background: colorFor(c.co) }} />{c.hole}</td>
+                                <td className="mono">
+                                  {best ? (
+                                    <span style={{ color: cuColor(best.cu), fontWeight: 600 }}>{best.width} m @ {best.cu}% Cu</span>
+                                  ) : "—"}
+                                  {best?.au ? <span style={{ marginLeft: 6, fontSize: 10.5, color: "var(--ink-soft)" }}>{best.au} g/t Au</span> : null}
+                                </td>
+                                <td className="mono" style={{ textAlign: "right", fontWeight: 600 }}>{c.depth}</td>
+                                <td style={{ color: "var(--ink-muted)", fontSize: 11.5 }}>{c.co}</td>
+                                <td className="mono" style={{ fontSize: 10.5, color: "var(--ink-soft)" }}><FileText size={11} style={{ verticalAlign: "-1px", marginRight: 4 }} />{c.src.replace("_PA_koordinaatidega", "")}</td>
+                              </tr>
+                            );
+                          })}
                         </tbody>
                       </table>
                     </div>

@@ -54,16 +54,20 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 - **AOI 1 — "Mt Isa"**: the original proof-of-concept run. Centre (385857, 7623831),
   5 km radius. 5 tenements, 3 listed companies (Carnaby Resources / C29 Metals /
   Hammer Metals), 18 drill collars extracted from real ASX announcement PDFs.
-  The 2D collar table (in `App.jsx`) carries hole ID, coordinates, total depth,
-  holder, and source PDF. The **3D view** (`public/drill3d.html`) also has real
-  per-hole **assay intervals (Cu% and Au g/t) and downhole survey traces**,
-  extracted from the same ASX announcements — confirmed pipeline output, not mock.
+  `ASSAYS_MTISA` in `App.jsx` carries real per-hole assay intervals (Cu% / Au g/t),
+  sourced from the same ASX announcements as the 3D view — confirmed pipeline output.
+  Best intercept: CBDD017W7 4.2 m @ 8.2% Cu. All tenements carry real `approved` /
+  `expiry` dates from the QLD shapefile. The **Drill view** is intercept-first: table
+  is sorted by best Cu% descending; easting/northing live only in the CSV export.
+  The **3D view** (`public/drill3d.html`) has the same assay intervals plus downhole
+  survey traces.
 - **AOI 2 — "North belt"**: a genuine *fresh* run on a new area 58 km north
   (394300, 7681000, 5 km). 7 tenements; 6 held by "MT. DOCKERELL MINING PTY LTD" all
   resolve to Hammer Metals (the holder→listed map generalising to permits never seen);
   1 holder (Mulga Minerals Pty Ltd) is **deliberately left unresolved/flagged**; **0
   collars** because the PDF corpus was not loaded for that run. The 0 is the *point* — it
   isolates extraction coverage as the frontier. Do not "fix" it by adding fake collars.
+  All 7 tenements carry real `approved`/`expiry` dates from the shapefile; no assays exist.
 - **Tenement polygons** are the real footprints from the QLD shapefile, reprojected to
   MGA94 metres and expressed as offsets from each AOI centre. They are blocky (sub-block
   graticule) on purpose — that is the true geometry, not a rendering bug. Do not simplify
@@ -74,13 +78,18 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 ## Things that are intentionally the way they are — do not "helpfully" change
 
 - **Commodity (Cu/Au/Co) and date filters are marked "preview" — not active filters.** The
-  2D collar table in `App.jsx` carries no per-hole commodity or date, so the toolbar filters
-  are deliberately disabled, badged "Preview", and explained by a muted helper line + hover
-  tooltip. Do NOT fabricate commodity/date values to make them "work", and do NOT re-enable
-  them without a real per-hole data source behind them. The honest next step is to wire them
-  to such a source. Note: the **3D view** (`public/drill3d.html`) DOES have real Cu%/Au g/t
-  assay intervals for AOI 1 — these are a separate dataset inside that file and do not
-  feed the 2D toolbar filters. In a verification tool a control that fakes interactivity is a liability.
+  toolbar filters are deliberately disabled, badged "Preview", and explained by a muted helper
+  line + tooltip. Do NOT re-enable them without a real per-hole filter back-end. Note:
+  `ASSAYS_MTISA` in `App.jsx` DOES have real Cu%/Au g/t intervals for AOI 1, but they power
+  the intercept table and KPI — not the toolbar filters. In a verification tool a control
+  that fakes interactivity is a liability.
+- **Drill view is intercept-first for AOI 1.** The intercept table sorts by best Cu% descending.
+  Easting/Northing are deliberately not shown in the table (they live in the CSV export). The
+  Cu-grade colouring uses three thresholds matching `drill3d.html`: ≥4% #DC2626, 1–4% #F59E0B,
+  <1% #14B8A6. Do not change these or add per-hole coordinates back to the table.
+- **Expiry badge** is shown only when a permit's expiry is ≤ 180 days out (currently EPM 27861
+  only, ~Oct 2026). For Granted permits already past their date use "renewal due" not "expired"
+  — QLD EPMs stay granted through renewal; the shapefile is a snapshot.
 - **Insight callouts are hand-authored narrative** grounded in the real data (e.g. the
   "Carnaby's holes straddle two other holders' permits" finding is verified by a real
   point-in-polygon test). They are flagged in code comments. If you change the data, update
@@ -92,9 +101,10 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
 
 ## Open improvements (good Claude Code tasks)
 
-1. ~~Resolve the decorative commodity/date filters honestly.~~ DONE — they are now disabled
-   and marked "preview" (badge + helper line + tooltip). Next: wire them to a real per-hole
-   commodity/date source so they can be honestly re-enabled as live filters.
+1. ~~Resolve the decorative commodity/date filters honestly.~~ DONE — disabled and marked
+   "preview". Next: wire them to a real per-hole commodity/date source (AOI 1 now has
+   `ASSAYS_MTISA` Cu%/Au g/t, so Cu/Au filters could be enabled for Mt Isa; AOI 2 has no
+   assays so they stay preview there).
 2. Derive the insight captions from the actual point-in-polygon computation instead of
    hardcoded strings, so they survive data changes.
 3. OPTIONAL geographic basemap: add a MapLibre GL JS view (no API token, vector tiles) as a
