@@ -17,9 +17,6 @@
  */
 import React, { useState, useMemo } from "react";
 import {
-  BarChart, Bar, XAxis, YAxis, Cell, Tooltip as RTooltip, ResponsiveContainer, CartesianGrid,
-} from "recharts";
-import {
   Map, Layers, Crosshair, MapPin, Building2, FileText, Download, Database,
   CheckCircle2, AlertTriangle, ShieldCheck, Search, Target, Gauge, Activity,
   Filter, ArrowUpRight, Inbox, Box,
@@ -132,6 +129,59 @@ const distOf = (c, aoi) => Math.round(Math.hypot(c.e - aoi.east, c.n - aoi.north
 const TODAY = new Date("2026-06-06");
 const daysToExpiry = (expiryStr) => Math.round((new Date(expiryStr) - TODAY) / 86400000);
 const cuColor = (cu) => cu >= 4 ? "#DC2626" : cu >= 1 ? "#F59E0B" : "#14B8A6";
+
+/* ── downhole strip log (2D companion to drill3d.html) — AOI 1 only ──
+   holes: [{ hole, co, td, intervals:[{from,to,width,cu,au}] }] sorted best-Cu first.
+   Surface at top, depth grows downward; grey bar = full hole, coloured
+   segments = assay intervals at true from→to depth, Cu thresholds = drill3d.html. */
+function StripLog({ holes }) {
+  const PAD_T = 70, PAD_L = 46, PAD_B = 18, PAD_R = 14;
+  const COL_W = 32, BAR_W = 4, SEG_W = 15, plotH = 440;
+  const maxTD = Math.max(...holes.map((h) => h.td));
+  const y = (d) => PAD_T + (d / maxTD) * plotH;
+  const width = PAD_L + holes.length * COL_W + PAD_R;
+  const height = PAD_T + plotH + PAD_B;
+  const ticks = [];
+  for (let d = 0; d <= maxTD; d += 100) ticks.push(d);
+
+  return (
+    <div style={{ overflowX: "auto" }}>
+      <svg width={width} height={height} style={{ display: "block", fontFamily: "Geist Mono" }}>
+        {/* depth axis ticks + gridlines */}
+        {ticks.map((d) => (
+          <g key={d}>
+            <line x1={PAD_L} y1={y(d)} x2={width - PAD_R} y2={y(d)}
+              stroke="var(--border-soft)" strokeDasharray={d === 0 ? "0" : "2 4"} strokeWidth={d === 0 ? 1.1 : 1} />
+            <text x={PAD_L - 8} y={y(d) + 3} textAnchor="end"
+              fontSize="9.5" fill="var(--ink-soft)">{d}</text>
+          </g>
+        ))}
+        <text x={PAD_L - 8} y={PAD_T - 12} textAnchor="end" fontSize="9" fill="var(--ink-muted)">depth m</text>
+
+        {holes.map((h, i) => {
+          const cx = PAD_L + i * COL_W + COL_W / 2;
+          return (
+            <g key={h.hole}>
+              {/* full hole length */}
+              <rect x={cx - BAR_W / 2} y={y(0)} width={BAR_W} height={y(h.td) - y(0)}
+                rx="1.5" fill="#C9CCC7" />
+              {/* assay intervals */}
+              {h.intervals.map((iv, j) => (
+                <rect key={j} x={cx - SEG_W / 2} y={y(iv.from)} width={SEG_W}
+                  height={Math.max(2, y(iv.to) - y(iv.from))} rx="1.5" fill={cuColor(iv.cu)}>
+                  <title>{`${h.hole} · ${iv.width} m @ ${iv.cu}% Cu, ${iv.au} g/t Au\n${iv.from}–${iv.to} m downhole`}</title>
+                </rect>
+              ))}
+              {/* hole label, rotated to avoid overlap */}
+              <text x={cx} y={PAD_T - 14} fontSize="9.5" fill="var(--ink-2)"
+                textAnchor="start" transform={`rotate(-50 ${cx} ${PAD_T - 14})`}>{h.hole}</text>
+            </g>
+          );
+        })}
+      </svg>
+    </div>
+  );
+}
 
 /* ─────────────────────────────── styles ─────────────────────────────── */
 function Styles() {
@@ -424,7 +474,13 @@ export default function App() {
     fire("collars.geojson exported · MGA94 z54 (EPSG:28354)");
   };
 
-  const depthData = [...collars].sort((a, b) => b.depth - a.depth).map((c) => ({ hole: c.hole, depth: c.depth, co: c.co }));
+  // Downhole strip-log data (AOI 1 only): holes ordered by best Cu% desc — same as the intercept table.
+  const stripHoles = areaId === "mtisa"
+    ? [...collars]
+        .filter((c) => ASSAYS_MTISA[c.hole])
+        .sort((a, b) => (ASSAYS_MTISA[b.hole].best.cu) - (ASSAYS_MTISA[a.hole].best.cu))
+        .map((c) => ({ hole: c.hole, co: c.co, td: ASSAYS_MTISA[c.hole].td, intervals: ASSAYS_MTISA[c.hole].intervals }))
+    : [];
   const aoiLabel = `${A.aoi.radius < 1000 ? A.aoi.radius + " m" : A.aoi.radius / 1000 + " km"}`;
 
   return (
@@ -593,21 +649,18 @@ export default function App() {
                 </div>
                 <div className="grid" style={{ gridTemplateColumns: "1fr 1.55fr" }}>
                   <div className="card">
-                    <div className="card-h"><div className="card-t">Depth by hole</div><div className="card-st">total depth, m</div></div>
+                    <div className="card-h"><div className="card-t">Downhole strip log</div><div className="card-st mono">depth m · best Cu first</div></div>
                     <div className="card-b">
-                      <ResponsiveContainer width="100%" height={Math.max(260, depthData.length * 22)}>
-                        <BarChart data={depthData} layout="vertical" margin={{ left: 8, right: 16, top: 4, bottom: 4 }}>
-                          <CartesianGrid horizontal={false} stroke="var(--border-soft)" strokeDasharray="2 4" />
-                          <XAxis type="number" axisLine={false} tickLine={false} tick={{ fontSize: 10, fill: "var(--ink-soft)", fontFamily: "Geist Mono" }} />
-                          <YAxis type="category" dataKey="hole" width={74} axisLine={false} tickLine={false} tick={{ fontSize: 9.5, fill: "var(--ink-muted)", fontFamily: "Geist Mono" }} />
-                          <RTooltip cursor={{ fill: "rgba(63,122,110,.06)" }}
-                            contentStyle={{ background: "var(--surface-2)", border: "1px solid var(--border)", borderRadius: 8, fontSize: 12, fontFamily: "Geist Mono" }}
-                            formatter={(v) => [v + " m", "depth"]} />
-                          <Bar dataKey="depth" radius={[0, 3, 3, 0]} barSize={12}>
-                            {depthData.map((d, i) => <Cell key={i} fill={colorFor(d.co)} fillOpacity={d.depth >= 550 ? 1 : 0.62} />)}
-                          </Bar>
-                        </BarChart>
-                      </ResponsiveContainer>
+                      <StripLog holes={stripHoles} />
+                      <div style={{ display: "flex", gap: 14, flexWrap: "wrap", margin: "10px 2px 2px", fontSize: 10.5, color: "var(--ink-muted)" }}>
+                        <span><span className="swatch" style={{ background: "#DC2626" }} />≥4% Cu</span>
+                        <span><span className="swatch" style={{ background: "#F59E0B" }} />1–4% Cu</span>
+                        <span><span className="swatch" style={{ background: "#14B8A6" }} />&lt;1% Cu</span>
+                        <span><span className="swatch" style={{ background: "#C9CCC7" }} />hole length</span>
+                      </div>
+                      <div style={{ fontSize: 11, color: "var(--ink-soft)", marginTop: 8, lineHeight: 1.5 }}>
+                        Downhole strip log — interval depth and Cu grade. Same colour logic as the 3D view.
+                      </div>
                     </div>
                   </div>
                   <div className="card">

@@ -58,7 +58,13 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   sourced from the same ASX announcements as the 3D view — confirmed pipeline output.
   Best intercept: CBDD017W7 4.2 m @ 8.2% Cu. All tenements carry real `approved` /
   `expiry` dates from the QLD shapefile. The **Drill view** is intercept-first: table
-  is sorted by best Cu% descending; easting/northing live only in the CSV export.
+  is sorted by best Cu% descending; easting/northing live only in the CSV export. It
+  also has a **downhole strip log** (hand-built inline SVG, `StripLog` in `App.jsx`) —
+  the 2D companion to `drill3d.html`: surface at top, depth growing downward, one column
+  per hole ordered best-Cu-first (CBDD017W7 leftmost), grey bar = full hole length,
+  coloured segments = assay intervals at true from→to depth, same Cu thresholds as the
+  3D view (≥4% #DC2626 / 1–4% #F59E0B / <1% #14B8A6). It replaced the old horizontal
+  "Depth by hole" bar chart; recharts is no longer imported.
   The **3D view** (`public/drill3d.html`) has the same assay intervals plus downhole
   survey traces.
 - **AOI 2 — "North belt"**: a genuine *fresh* run on a new area 58 km north
@@ -87,6 +93,11 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   Easting/Northing are deliberately not shown in the table (they live in the CSV export). The
   Cu-grade colouring uses three thresholds matching `drill3d.html`: ≥4% #DC2626, 1–4% #F59E0B,
   <1% #14B8A6. Do not change these or add per-hole coordinates back to the table.
+  Alongside the table is the **downhole strip log** (`StripLog`, inline SVG, AOI 1 only —
+  North belt has no assays and keeps its empty state). Same Cu thresholds and `cuColor()`
+  helper as the table and 3D view; depth grows downward from a surface line, columns
+  ordered best-Cu-first. Don't render it for North belt and don't swap it back for a
+  horizontal bar chart.
 - **Expiry badge** is shown only when a permit's expiry is ≤ 180 days out (currently EPM 27861
   only, ~Oct 2026). For Granted permits already past their date use "renewal due" not "expired"
   — QLD EPMs stay granted through renewal; the shapefile is a snapshot.
