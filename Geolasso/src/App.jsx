@@ -249,7 +249,7 @@ function HoleDrawer({ collar, onClose }) {
 function Styles() {
   return (
     <style>{`
-      @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
+      @import url('https://fonts.googleapis.com/css2?family=Geist:wght@300;400;500;600;700&family=Geist+Mono:wght@400;500;600&display=swap');
       :root{
         --bg:#F4ECE0; --bg-grain:#F0E6D2; --surface:#FBF5EA; --surface-2:#FFFCF6;
         --ink:#1A2B45; --ink-2:#34425C; --ink-muted:#5C6373; --ink-soft:#8B8472;
@@ -264,7 +264,7 @@ function Styles() {
         radial-gradient(900px 500px at 110% 10%, #EFE7D6, transparent 55%), var(--bg);
         min-height:100vh;display:flex;font-size:14px;-webkit-font-smoothing:antialiased}
       .mono{font-family:'Geist Mono',monospace;font-variant-numeric:tabular-nums}
-      .disp{font-family:'Fraunces',serif;font-feature-settings:'ss01';letter-spacing:-.02em}
+      .disp{font-family:'Geist',sans-serif;font-feature-settings:'ss01';letter-spacing:-.02em}
       .fade{animation:fade .32s ease}
       @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
       .sb{width:236px;flex:0 0 236px;background:var(--surface);border-right:1px solid var(--border);
