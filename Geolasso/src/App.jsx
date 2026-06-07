@@ -610,7 +610,7 @@ export default function App() {
             <div className="meta mono">{a.tenements.length || a.geom.length} permits · {a.collars.length} collars</div>
           </div>
         ))}
-        <div className="sb-foot">Prototype · real GeoLasso pipeline output<br />on QLD open data.<br /><b style={{ color: "var(--ink-muted)" }}>A Civitta sales asset</b></div>
+        <div className="sb-foot">Prototype · real GeoLasso pipeline output<br />on QLD open data.</div>
       </aside>
 
       <div className="main">
