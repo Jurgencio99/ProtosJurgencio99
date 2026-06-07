@@ -306,8 +306,12 @@ const WINDOWS = {
   drill: { xMin: -260,  xMax: 540,  yMin: -300,  yMax: 1140, VW: 400, scaleM: 200,  scaleLab: "200 m", gridStep: 200 },
 };
 
-function PlanMap({ area, collars, hovered, setHovered, mode }) {
+function PlanMap({ area, collars, hovered, setHovered, mode, markerMode = "holders" }) {
   const aoi = area.aoi;
+  // Grade×width (gram-metre) bubbles — AOI 1 only; markerMode is forced to "holders" elsewhere.
+  // radius ∝ sqrt(gram-metres) so AREA is proportional to Cu×width; clamped readable.
+  const gw = markerMode === "gradewidth";
+  const gmRadius = (best) => Math.max(3, Math.min(15, 1.7 * Math.sqrt(best.cu * best.width)));
   const W = WINDOWS[mode];
   const Wm = W.xMax - W.xMin, Hm = W.yMax - W.yMin;
   const VW = W.VW, VH = (VW * Hm) / Wm;
@@ -370,7 +374,12 @@ function PlanMap({ area, collars, hovered, setHovered, mode }) {
           </g>
           {collars.map((c, i) => {
             const dE = c.e - aoi.east, dN = c.n - aoi.north;
-            const r = mode === "drill" ? 3.4 + Math.sqrt(c.depth) / 3.6 : 2.6;
+            const best = gw ? ASSAYS_MTISA[c.hole]?.best : null;
+            // Holders: dot sized by depth (drill) / fixed (aoi), coloured by company.
+            // Grade×width: bubble sized by gram-metres, coloured by Cu grade; no-assay → min grey.
+            const r = gw ? (best ? gmRadius(best) : 3)
+              : (mode === "drill" ? 3.4 + Math.sqrt(c.depth) / 3.6 : 2.6);
+            const fill = gw ? (best ? cuColor(best.cu) : UNRESOLVED) : colorFor(c.co);
             const on = hovered === c.hole;
             const grp = at0.findIndex((x) => x.hole === c.hole);
             const isStack = mode === "drill" && c.e === aoi.east && c.n === aoi.north && grp >= 0;
@@ -378,18 +387,21 @@ function PlanMap({ area, collars, hovered, setHovered, mode }) {
             const off = isStack ? 7 : 0;
             return (
               <circle key={c.hole + i} cx={px(dE) + Math.cos(ang) * off} cy={py(dN) + Math.sin(ang) * off}
-                r={on ? r + 2 : r} fill={colorFor(c.co)} fillOpacity={on ? 0.95 : 0.8}
+                r={on ? r + 2 : r} fill={fill} fillOpacity={on ? 0.95 : 0.8}
                 stroke="#fff" strokeWidth={on ? 1.4 : 0.7} style={{ cursor: "pointer", transition: "r .12s" }}
                 onMouseEnter={() => setHovered(c.hole)} onMouseLeave={() => setHovered(null)} />
             );
           })}
           {collars.filter((c) => c.hole === hovered).map((c) => {
-            const lx = Math.min(px(c.e - aoi.east) + 10, VW - 96), ly = Math.max(py(c.n - aoi.north) - 8, 18);
+            const best = gw ? ASSAYS_MTISA[c.hole]?.best : null;
+            const boxW = best ? 116 : 92, boxH = best ? 36 : 26;
+            const lx = Math.min(px(c.e - aoi.east) + 10, VW - boxW - 4), ly = Math.max(py(c.n - aoi.north) - 8, 18);
             return (
               <g key="lab">
-                <rect x={lx} y={ly - 12} width="92" height="26" rx="5" fill="var(--ink)" />
+                <rect x={lx} y={ly - 12} width={boxW} height={boxH} rx="5" fill="var(--ink)" />
                 <text x={lx + 7} y={ly + 1} fill="#fff" fontSize="8.5" fontFamily="Geist Mono">{c.hole}</text>
                 <text x={lx + 7} y={ly + 10} fill="#9FB4C9" fontSize="7.5" fontFamily="Geist Mono">{c.depth} m TD</text>
+                {best && <text x={lx + 7} y={ly + 20} fill={cuColor(best.cu)} fontSize="7.5" fontFamily="Geist Mono">{best.width} m @ {best.cu}% Cu</text>}
               </g>
             );
           })}
@@ -406,9 +418,13 @@ function PlanMap({ area, collars, hovered, setHovered, mode }) {
         </g>
       </svg>
       <div style={{ position: "absolute", top: 10, left: 12, fontSize: 10.5, color: "var(--ink-soft)", fontFamily: "Geist Mono" }}>
-        {mode === "aoi"
-          ? `AOI ${(aoi.radius / 1000).toFixed(0)} km · real permit footprints (QLD open data)`
-          : "plan zoomed to drilling · marker size ∝ depth · dashed = permit boundary"}
+        {gw
+          ? (mode === "aoi"
+              ? `AOI ${(aoi.radius / 1000).toFixed(0)} km · bubble size ∝ gram-metres (Cu×width)`
+              : "plan zoomed to drilling · bubble size ∝ gram-metres (Cu×width) · dashed = permit boundary")
+          : (mode === "aoi"
+              ? `AOI ${(aoi.radius / 1000).toFixed(0)} km · real permit footprints (QLD open data)`
+              : "plan zoomed to drilling · marker size ∝ depth · dashed = permit boundary")}
       </div>
     </div>
   );
@@ -442,6 +458,7 @@ export default function App() {
   const [view, setView] = useState("query");
   const [radius, setRadius] = useState(5000);
   const [mapMode, setMapMode] = useState("aoi");
+  const [markerMode, setMarkerMode] = useState("holders"); // plan-map collar styling: "holders" | "gradewidth" (AOI 1 only)
   const [hovered, setHovered] = useState(null);
   const [toast, setToast] = useState(null);
 
@@ -458,7 +475,7 @@ export default function App() {
   const withData = A.coverage.filter((c) => c.collars > 0).length;
 
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
-  const switchArea = (id) => { setAreaId(id); setRadius(AREAS[id].aoi.radius); setMapMode("aoi"); setHovered(null); };
+  const switchArea = (id) => { setAreaId(id); setRadius(AREAS[id].aoi.radius); setMapMode("aoi"); setMarkerMode("holders"); setHovered(null); };
 
   const exportCsv = () => {
     const head = "HoleID,Easting,Northing,Total_Depth,Company,Source_PDF";
@@ -557,16 +574,34 @@ export default function App() {
             <div className="grid" style={{ gridTemplateColumns: "minmax(360px,1fr) 1.25fr" }}>
               <div className="card">
                 <div className="card-h"><div><div className="card-t">Plan view</div><div className="card-st">real permit footprints + extracted collars</div></div>
-                  <div className="fseg">
-                    <button className={mapMode === "aoi" ? "on" : ""} onClick={() => setMapMode("aoi")}>AOI {aoiLabel}</button>
-                    <button className={mapMode === "drill" ? "on" : ""} onClick={() => setMapMode("drill")}>Drilling</button>
+                  <div style={{ display: "flex", gap: 8 }}>
+                    {/* Grade×width toggle: AOI 1 only — North belt has no assays, so it never offers the mode */}
+                    {areaId === "mtisa" && (
+                      <div className="fseg">
+                        <button className={markerMode === "holders" ? "on" : ""} onClick={() => setMarkerMode("holders")}>Holders</button>
+                        <button className={markerMode === "gradewidth" ? "on" : ""} onClick={() => setMarkerMode("gradewidth")}>Grade×width</button>
+                      </div>
+                    )}
+                    <div className="fseg">
+                      <button className={mapMode === "aoi" ? "on" : ""} onClick={() => setMapMode("aoi")}>AOI {aoiLabel}</button>
+                      <button className={mapMode === "drill" ? "on" : ""} onClick={() => setMapMode("drill")}>Drilling</button>
+                    </div>
                   </div></div>
                 <div className="card-b">
-                  <PlanMap area={A} collars={collars} hovered={hovered} setHovered={setHovered} mode={mapMode} />
+                  <PlanMap area={A} collars={collars} hovered={hovered} setHovered={setHovered} mode={mapMode}
+                    markerMode={areaId === "mtisa" ? markerMode : "holders"} />
                   <div className="legend" style={{ marginTop: 12 }}>
                     {cos.map((name) => (<span key={name}><span className="swatch" style={{ background: colorFor(name) }} />{name} <span className="tk">{tickerFor(name)}</span></span>))}
                     {unresolved.map((h) => (<span key={h}><span className="swatch" style={{ background: UNRESOLVED }} />{h} <span className="tk">unmapped</span></span>))}
                   </div>
+                  {areaId === "mtisa" && markerMode === "gradewidth" && (
+                    <div className="legend" style={{ marginTop: 8, fontSize: 11 }}>
+                      <span style={{ color: "var(--ink-soft)" }}>bubble size = Cu × width (gram-metres) · colour = Cu grade</span>
+                      <span><span className="swatch" style={{ background: "#DC2626" }} />≥4% Cu</span>
+                      <span><span className="swatch" style={{ background: "#F59E0B" }} />1–4% Cu</span>
+                      <span><span className="swatch" style={{ background: "#14B8A6" }} />&lt;1% Cu</span>
+                    </div>
+                  )}
                   {mapMode === "aoi" && areaId === "mtisa" && (
                     <div style={{ marginTop: 10, fontSize: 11.5, color: "var(--ink-muted)", lineHeight: 1.45 }}>
                       <AlertTriangle size={12} style={{ verticalAlign: "-2px", marginRight: 5, color: "var(--accent-warm)" }} />

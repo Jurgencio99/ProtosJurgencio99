@@ -66,7 +66,13 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   3D view (≥4% #DC2626 / 1–4% #F59E0B / <1% #14B8A6). It replaced the old horizontal
   "Depth by hole" bar chart; recharts is no longer imported.
   The **3D view** (`public/drill3d.html`) has the same assay intervals plus downhole
-  survey traces.
+  survey traces. The **plan map** (Area & tenements view) has a **Holders | Grade×width
+  toggle (AOI 1 only)**: "Holders" is the default (collar dots coloured by company);
+  "Grade×width" sizes each hole's bubble by its best intercept's gram-metres (`best.cu *
+  best.width`, radius ∝ √gram-metres so area is proportional) and colours by Cu grade using
+  the same `cuColor()` thresholds as the strip log and 3D view (≥4% #DC2626 / 1–4% #F59E0B
+  / <1% #14B8A6). Works at both AOI and Drilling zoom. North belt has no assays, so it
+  never offers the toggle (`markerMode` is forced to "holders" off AOI 1).
 - **AOI 2 — "North belt"**: a genuine *fresh* run on a new area 58 km north
   (394300, 7681000, 5 km). 7 tenements; 6 held by "MT. DOCKERELL MINING PTY LTD" all
   resolve to Hammer Metals (the holder→listed map generalising to permits never seen);
@@ -98,6 +104,14 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   helper as the table and 3D view; depth grows downward from a surface line, columns
   ordered best-Cu-first. Don't render it for North belt and don't swap it back for a
   horizontal bar chart.
+- **Plan map has a Holders | Grade×width toggle (AOI 1 only).** "Holders" is the default and
+  unchanged behaviour (company-coloured collar dots). "Grade×width" is the value-weighted
+  view: bubble area ∝ gram-metres (`best.cu * best.width`, radius = `√(cu·width)` clamped
+  3–15 px), fill = `cuColor(best.cu)` (same thresholds as the strip log / 3D view), white
+  stroke. The biggest bubble can be amber (CBRC057, 71 m @ 1% Cu) — that's an honest
+  thick-low-grade hit, not a bug; the three reds are CBDD017W5 / CBRC055 / CBDD017W7. Only
+  Mt Isa renders the toggle; North belt has no assays and stays Holders-only. Don't change
+  the Cu thresholds, don't add the toggle to North belt, and keep "Holders" mode as-is.
 - **Expiry badge** is shown only when a permit's expiry is ≤ 180 days out (currently EPM 27861
   only, ~Oct 2026). For Granted permits already past their date use "renewal due" not "expired"
   — QLD EPMs stay granted through renewal; the shapefile is a snapshot.
