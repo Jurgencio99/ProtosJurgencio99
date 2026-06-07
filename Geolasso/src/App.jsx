@@ -15,11 +15,11 @@
  * Tenement polygons are the real footprints from the QLD open-data shapefile.
  * Insight callouts are hand-authored narrative grounded in the real data (flagged inline).
  */
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import {
   Map, Layers, Crosshair, MapPin, Building2, FileText, Download, Database,
   CheckCircle2, AlertTriangle, ShieldCheck, Search, Target, Gauge, Activity,
-  Filter, ArrowUpRight, Inbox, Box,
+  Filter, ArrowUpRight, Inbox, Box, X,
 } from "lucide-react";
 
 /* ─────────────────────────────── shared styling for entities ─────────────────────────────── */
@@ -183,6 +183,68 @@ function StripLog({ holes }) {
   );
 }
 
+/* ── per-hole detail drawer (AOI 1 only) — opened by clicking an intercept-table row ──
+   This is the home of the collar coordinates in the UI (kept out of the comparison table
+   by design; also in the CSV export). Shows the hole's full picture the summary table
+   can't: every interval (not just the best) + a single-column StripLog reused verbatim
+   so the Cu thresholds / depth rendering stay identical to the main strip log + 3D view. */
+function HoleDrawer({ collar, onClose }) {
+  const a = ASSAYS_MTISA[collar.hole];
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === "Escape") onClose(); };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [onClose]);
+  return (
+    <>
+      <div className="gl-backdrop" onClick={onClose} />
+      <aside className="gl-drawer" role="dialog" aria-label={`Hole ${collar.hole} detail`}>
+        <div className="gl-drawer-h">
+          <div>
+            <div className="mono" style={{ fontSize: 18, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+              <span className="swatch" style={{ background: colorFor(collar.co), width: 11, height: 11 }} />{collar.hole}
+            </div>
+            <div style={{ fontSize: 11.5, color: "var(--ink-muted)", marginTop: 4 }}>{collar.co} · {tickerFor(collar.co)}</div>
+          </div>
+          <button className="gl-drawer-x" onClick={onClose} aria-label="Close hole detail"><X size={18} /></button>
+        </div>
+        <div className="gl-drawer-b">
+          <div style={{ display: "flex", alignItems: "center", gap: 16, fontSize: 12.5, flexWrap: "wrap" }}>
+            <span><span style={{ color: "var(--ink-soft)" }}>Total depth </span><span className="mono" style={{ fontWeight: 600 }}>{a.td} m</span></span>
+            <span style={{ color: "var(--ink-soft)", display: "inline-flex", alignItems: "center", gap: 5 }}>
+              <FileText size={12} /><span className="mono" style={{ color: "var(--ink-muted)" }}>{a.src}</span>
+            </span>
+          </div>
+
+          <div className="dr-sec">Collar · MGA94 z54 (EPSG:28354)</div>
+          <div className="dr-coord">
+            <div className="box"><div className="lab">Easting</div><div className="val">{collar.e.toLocaleString()}</div></div>
+            <div className="box"><div className="lab">Northing</div><div className="val">{collar.n.toLocaleString()}</div></div>
+          </div>
+
+          <div className="dr-sec">Downhole strip log</div>
+          <StripLog holes={[{ hole: collar.hole, co: collar.co, td: a.td, intervals: a.intervals }]} />
+
+          <div className="dr-sec">All intervals · {a.intervals.length} logged</div>
+          <table>
+            <thead><tr><th>From–To</th><th style={{ textAlign: "right" }}>Width</th><th style={{ textAlign: "right" }}>Cu %</th><th style={{ textAlign: "right" }}>Au g/t</th></tr></thead>
+            <tbody>
+              {a.intervals.map((iv, j) => (
+                <tr key={j}>
+                  <td className="mono">{iv.from}–{iv.to} m</td>
+                  <td className="mono" style={{ textAlign: "right" }}>{iv.width} m</td>
+                  <td className="mono" style={{ textAlign: "right", color: cuColor(iv.cu), fontWeight: 600 }}>{iv.cu}</td>
+                  <td className="mono" style={{ textAlign: "right", color: "var(--ink-muted)" }}>{iv.au}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </aside>
+    </>
+  );
+}
+
 /* ─────────────────────────────── styles ─────────────────────────────── */
 function Styles() {
   return (
@@ -296,6 +358,23 @@ function Styles() {
       .empty .ic{width:46px;height:46px;border-radius:12px;display:flex;align-items:center;justify-content:center;background:var(--border-soft);color:var(--ink-soft)}
       .toast{position:fixed;bottom:22px;left:50%;transform:translateX(-50%);background:var(--ink);color:#fff;
         padding:11px 18px;border-radius:10px;font-size:13px;box-shadow:var(--shadow-strong);display:flex;align-items:center;gap:9px;z-index:20}
+      tr.clickable{cursor:pointer}
+      tr.clickable:hover td{background:rgba(63,122,110,.05)}
+      .gl-backdrop{position:fixed;inset:0;background:rgba(26,43,69,.22);z-index:30;animation:fade .2s ease}
+      .gl-drawer{position:fixed;top:0;right:0;height:100vh;width:396px;max-width:92vw;background:var(--surface-2);
+        border-left:1px solid var(--border);box-shadow:var(--shadow-strong);z-index:31;display:flex;flex-direction:column;
+        animation:slidein .26s cubic-bezier(.22,.61,.36,1)}
+      @keyframes slidein{from{transform:translateX(100%)}to{transform:none}}
+      .gl-drawer-h{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;
+        padding:18px 18px 14px;border-bottom:1px solid var(--border-soft)}
+      .gl-drawer-b{padding:6px 18px 30px;overflow:auto;flex:1}
+      .gl-drawer-x{background:transparent;border:0;cursor:pointer;color:var(--ink-soft);padding:5px;border-radius:7px;display:flex}
+      .gl-drawer-x:hover{background:var(--border-soft);color:var(--ink)}
+      .dr-sec{font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--ink-soft);font-weight:600;margin:20px 0 9px}
+      .dr-coord{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+      .dr-coord .box{background:var(--surface);border:1px solid var(--border-soft);border-radius:9px;padding:9px 11px}
+      .dr-coord .lab{font-size:10px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em}
+      .dr-coord .val{font-family:'Geist Mono',monospace;font-size:15px;font-weight:600;color:var(--ink);margin-top:3px}
     `}</style>
   );
 }
@@ -461,6 +540,7 @@ export default function App() {
   const [markerMode, setMarkerMode] = useState("holders"); // plan-map collar styling: "holders" | "gradewidth" (AOI 1 only)
   const [hovered, setHovered] = useState(null);
   const [toast, setToast] = useState(null);
+  const [drawerHole, setDrawerHole] = useState(null); // per-hole detail drawer (AOI 1 only)
 
   const A = AREAS[areaId];
   const collars = useMemo(() => A.collars.filter((c) => distOf(c, A.aoi) <= radius), [A, radius]);
@@ -475,7 +555,7 @@ export default function App() {
   const withData = A.coverage.filter((c) => c.collars > 0).length;
 
   const fire = (msg) => { setToast(msg); setTimeout(() => setToast(null), 2600); };
-  const switchArea = (id) => { setAreaId(id); setRadius(AREAS[id].aoi.radius); setMapMode("aoi"); setMarkerMode("holders"); setHovered(null); };
+  const switchArea = (id) => { setAreaId(id); setRadius(AREAS[id].aoi.radius); setMapMode("aoi"); setMarkerMode("holders"); setHovered(null); setDrawerHole(null); };
 
   const exportCsv = () => {
     const head = "HoleID,Easting,Northing,Total_Depth,Company,Source_PDF";
@@ -499,6 +579,10 @@ export default function App() {
         .map((c) => ({ hole: c.hole, co: c.co, td: ASSAYS_MTISA[c.hole].td, intervals: ASSAYS_MTISA[c.hole].intervals }))
     : [];
   const aoiLabel = `${A.aoi.radius < 1000 ? A.aoi.radius + " m" : A.aoi.radius / 1000 + " km"}`;
+  // Drawer target: only render if the selected hole is in-AOI and has assays (AOI 1 only).
+  const drawerCollar = (areaId === "mtisa" && drawerHole)
+    ? collars.find((c) => c.hole === drawerHole && ASSAYS_MTISA[c.hole])
+    : null;
 
   return (
     <div className="gl-root">
@@ -699,7 +783,7 @@ export default function App() {
                     </div>
                   </div>
                   <div className="card">
-                    <div className="card-h"><div className="card-t">Intercept table</div><div className="card-st mono">sorted by best Cu% · E/N in CSV export</div></div>
+                    <div className="card-h"><div className="card-t">Intercept table</div><div className="card-st mono">sorted by best Cu% · row → hole detail + coords</div></div>
                     <div className="card-b" style={{ paddingTop: 4, maxHeight: 520, overflow: "auto" }}>
                       <table>
                         <thead><tr><th>Hole</th><th>Best intercept</th><th style={{ textAlign: "right" }}>TD</th><th>Company</th><th>Source PDF</th></tr></thead>
@@ -710,8 +794,11 @@ export default function App() {
                             return bb - ba;
                           }).map((c) => {
                             const best = ASSAYS_MTISA[c.hole]?.best;
+                            const clickable = !!ASSAYS_MTISA[c.hole];
                             return (
                               <tr key={c.hole}
+                                className={(clickable ? "clickable" : "") + (drawerHole === c.hole ? " hl" : "")}
+                                onClick={clickable ? () => setDrawerHole(c.hole) : undefined}
                                 onMouseEnter={() => setHovered(c.hole)} onMouseLeave={() => setHovered(null)}>
                                 <td className="mono" style={{ fontWeight: 600 }}><span className="swatch" style={{ background: colorFor(c.co) }} />{c.hole}</td>
                                 <td className="mono">
@@ -731,6 +818,7 @@ export default function App() {
                     </div>
                   </div>
                 </div>
+                {drawerCollar && <HoleDrawer collar={drawerCollar} onClose={() => setDrawerHole(null)} />}
               </>
             )}
           </div>

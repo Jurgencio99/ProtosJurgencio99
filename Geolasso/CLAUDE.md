@@ -64,7 +64,13 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   per hole ordered best-Cu-first (CBDD017W7 leftmost), grey bar = full hole length,
   coloured segments = assay intervals at true from→to depth, same Cu thresholds as the
   3D view (≥4% #DC2626 / 1–4% #F59E0B / <1% #14B8A6). It replaced the old horizontal
-  "Depth by hole" bar chart; recharts is no longer imported.
+  "Depth by hole" bar chart; recharts is no longer imported. Clicking a row in the
+  intercept table opens a **per-hole detail drawer** (`HoleDrawer` in `App.jsx`, AOI 1
+  only): header (HoleID + company swatch + ticker, TD, source PDF), the collar's
+  **Easting/Northing (MGA94 z54)** — coordinates now live here in the UI (and the CSV
+  export), deliberately kept out of the comparison table — a single-column StripLog reused
+  verbatim, and a table of **all** intervals (not just best) so multi-interval holes
+  (CBDD017W2, CBRC063, …) show their full picture.
   The **3D view** (`public/drill3d.html`) has the same assay intervals plus downhole
   survey traces. The **plan map** (Area & tenements view) has a **Holders | Grade×width
   toggle (AOI 1 only)**: "Holders" is the default (collar dots coloured by company);
@@ -104,6 +110,15 @@ Zone 54). Treat the embedded data as ground truth. Do not "improve" it by invent
   helper as the table and 3D view; depth grows downward from a surface line, columns
   ordered best-Cu-first. Don't render it for North belt and don't swap it back for a
   horizontal bar chart.
+- **Intercept-table rows open a per-hole detail drawer (`HoleDrawer`, AOI 1 only).** Row
+  click slides in a right-hand drawer over a faint backdrop (X / Esc / click-outside to
+  close; selected row highlighted with `.hl`). It is **additive** — it did NOT change the
+  table columns, KPIs, strip log, plan map, 3D view, or CSV export. **Coordinates
+  (Easting/Northing, MGA94 z54) live in this drawer and the CSV export — keep them OUT of
+  the comparison table.** The drawer also shows *all* intervals for the hole (the table
+  shows only the best), reuses `StripLog` verbatim for a single-column mini log, and uses
+  the same `cuColor()` thresholds. North belt has no collars/assays, so no rows are
+  clickable there and the empty state is unchanged.
 - **Plan map has a Holders | Grade×width toggle (AOI 1 only).** "Holders" is the default and
   unchanged behaviour (company-coloured collar dots). "Grade×width" is the value-weighted
   view: bubble area ∝ gram-metres (`best.cu * best.width`, radius = `√(cu·width)` clamped
